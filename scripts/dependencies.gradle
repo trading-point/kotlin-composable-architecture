@@ -1,0 +1,32 @@
+ext {
+    //region Versions
+    versions = [:]
+    //endregion
+
+    //region Libraries
+    libraries = [:]
+
+    // https://github.com/JetBrains/kotlin/blob/1.3.72/ChangeLog.md#1372
+    libraries.kotlin = [:]
+    libraries.kotlin.version = '1.3.72'
+
+    //endregion
+
+    //region Classpaths
+    classpaths = [:]
+    // https://developer.android.com/studio/releases/gradle-plugin#4-0-0
+    classpaths.gradle = "com.android.tools.build:gradle:4.0.0"
+    classpaths.kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libraries.kotlin.version}"
+    // https://github.com/ben-manes/gradle-versions-plugin/releases/tag/v0.28.0
+    classpaths.versions = "com.github.ben-manes:gradle-versions-plugin:0.28.0"
+    // https://detekt.github.io/detekt/changelog.html#1100
+    classpaths.detekt = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.10.0"
+    //endregion
+
+    //region Repositories
+    repos = {
+        google()
+        jcenter()
+    }
+    //endregion
+}

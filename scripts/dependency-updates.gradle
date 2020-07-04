@@ -1,0 +1,24 @@
+/*
+Easily apply the versions plugin and check for STABLE updates
+https://github.com/ben-manes/gradle-versions-plugin
+
+Usage (root build.gradle):
+    apply from: "$rootDir/dependency-updates.gradle"
+    Add classpath classpaths.versions
+ */
+apply plugin: "com.github.ben-manes.versions"
+
+def isNonStable = { String version ->
+    def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { it -> version.toUpperCase().contains(it) }
+    def regex = /^[0-9,\\.v\\-]+(-r)?$/
+    return !stableKeyword && !(version ==~ regex)
+}
+
+dependencyUpdates {
+
+    // reject all non stable versions
+    rejectVersionIf {
+        isNonStable(it.candidate.version)
+    }
+
+}

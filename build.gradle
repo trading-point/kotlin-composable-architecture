@@ -1,0 +1,21 @@
+apply from: 'scripts/dependency-updates.gradle'
+
+buildscript {
+    apply from: 'scripts/dependencies.gradle'
+
+    repositories(repos)
+    dependencies {
+        classpath classpaths.gradle
+        classpath classpaths.kotlin
+        classpath classpaths.versions
+        classpath classpaths.detekt
+    }
+}
+
+allprojects {
+    repositories(repos)
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
