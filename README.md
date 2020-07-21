@@ -13,3 +13,4 @@ A Kotlin port of [Point Free](https://github.com/pointfreeco)'s "[The Composable
 
 ## Pending items:
 - Migrate `forEach` reducers
+_ Migrate `ViewStore.binding`
