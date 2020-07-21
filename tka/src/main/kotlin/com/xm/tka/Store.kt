@@ -147,6 +147,10 @@ This can happen for a few reasons:
             toLocalState(Observable.just(it)).blockingFirst(null)
         }
 
+        // hold the disposable of the previous emitted store to dispose it before emitting the next
+        // "fix" for testScopeWithPublisherTransform
+        var previousEmissionDisposable: Disposable? = null
+
         return toLocalState(_state)
             .map { localState ->
                 Store<LOCAL_STATE, LOCAL_ACTION>(
@@ -161,12 +165,13 @@ This can happen for a few reasons:
                         )
                     }
                 ).also { localStore ->
+                    previousEmissionDisposable?.dispose()
                     // TODO Verify the absence of WeakReference causes no leaks
                     localStore.parentDisposable = _state.subscribe { state ->
                         localStore._state.onNext(
                             extractLocalState(state) ?: localStore.currentState
                         )
-                    }
+                    }.also { previousEmissionDisposable = it }
                 }
             }
     }
