@@ -88,8 +88,8 @@ before sending an action.
 Unhandled actions: $receivedActions
                         """
                     }
-                    runReducer(fromLocalAction.get(type.localAction))
-                    val expectedState = toLocalState.get(state)
+                    runReducer(fromLocalAction(type.localAction))
+                    val expectedState = toLocalState(state)
                     type.update(expectedState)
                 }
                 is Receive -> {
@@ -107,7 +107,7 @@ Received unexpected action
                         """
                     }
                     runReducer(receivedAction)
-                    val expectedState = toLocalState.get(state)
+                    val expectedState = toLocalState(state)
                     type.update(expectedState)
                 }
                 is Environment -> {
@@ -122,8 +122,8 @@ before sending an action.
                 }
             }
 
-            val actualState = toLocalState.get(state)
-            val expectedState = toLocalState.get(state)
+            val actualState = toLocalState(state)
+            val expectedState = toLocalState(state)
             assert(expectedState == actualState) {
                 """
 State change does not match expectation
@@ -249,8 +249,8 @@ This can happen for a few reasons:
             initialState,
             reducer,
             environment,
-            Getter { it },
-            Getter { it }
+            { it },
+            { it }
         )
     }
 }
