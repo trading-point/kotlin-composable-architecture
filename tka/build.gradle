@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+apply from: "$rootDir/scripts/detekt.gradle"
+
+sourceSets.all {
+    java.srcDirs = files("src/$name/kotlin")
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation libraries.kotlin.jdk
+    implementation libraries.rx.java
+
+    testImplementation libraries.junit
+}
+
+sourceCompatibility = versions.sdk.compatibility
+targetCompatibility = versions.sdk.compatibility
