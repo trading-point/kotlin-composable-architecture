@@ -2,11 +2,18 @@
 
 package com.xm.tka
 
+import com.xm.tka.Effects.cancel
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Observable
+import io.reactivex.Observable.concat
 import io.reactivex.Single
+import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
+import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * The `Effect` type encapsulates a unit of work that can be run in the outside world, and can feed
@@ -76,6 +83,19 @@ object Effects {
      */
     fun <ACTION> merge(vararg effects: Effect<ACTION>): Effect<ACTION> =
         Observable.merge(effects.toList())
+
+    /**
+     * An effect that will cancel any currently in-flight effect with the given identifier.
+     *
+     * @param id: An effect identifier.
+     * @return A new effect that will cancel any currently in-flight effect with the given
+     * identifier.
+     */
+    fun <ACTION> cancel(id: Any): Effect<ACTION> = fireAndForget {
+        disposablesLock.withLock {
+            cancellationDisposables[id]?.forEach { it.dispose() }
+        }
+    }
 }
 
 /**
@@ -97,3 +117,55 @@ fun <ACTION> Maybe<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
  * Turns any [Completable] into an `Effect`
  */
 fun <ACTION> Completable.toEffect(): Effect<ACTION> = this.andThen(Observable.empty<ACTION>())
+
+/**
+ * Turns an effect into one that is capable of being canceled.
+ *
+ * To turn an effect into a cancellable one you must provide an identifier, which is used in
+ * `Effect.cancel(id:)` to identify which in-flight effect should be canceled.
+ *
+ * @param id: The effect's identifier.
+ * @param cancelInFlight: Determines if any in-flight effect with the same identifier should be
+ * canceled before starting this new one.
+ * @return A new effect that is capable of being canceled by an identifier.
+ */
+fun <ACTION> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false): Effect<ACTION> {
+    val effect = Observable.defer<ACTION> {
+        disposablesLock.withLock { /*No-op*/ }
+
+        val subject = PublishSubject.create<ACTION>()
+        val values = mutableListOf<ACTION>()
+        var isCaching = true
+        val disposable = this
+            .doOnNext { if (isCaching) values.add(it) }
+            .subscribe(subject::onNext, subject::onError, subject::onComplete)
+
+        var cancellationDisposable: Disposable? = null
+        cancellationDisposable = Disposables.fromAction {
+            disposablesLock.withLock {
+                subject.onComplete()
+                disposable.dispose()
+                cancellationDisposables[id]
+                    ?.apply {
+                        remove(cancellationDisposable)
+                    }
+                    ?.ifEmpty {
+                        cancellationDisposables.remove(id)
+                    }
+            }
+        }
+
+        cancellationDisposables.getOrPut(id) { mutableSetOf() }.add(cancellationDisposable)
+
+        Observable.fromIterable(values)
+            .concatWith(subject)
+            .doOnError { cancellationDisposable.dispose() }
+            .doOnComplete { cancellationDisposable.dispose() }
+            .doOnSubscribe { isCaching = false }
+            .doOnDispose { cancellationDisposable.dispose() }
+    }
+    return if (cancelInFlight) concat(cancel(id), effect) else effect
+}
+
+private val disposablesLock = ReentrantLock()
+internal val cancellationDisposables = mutableMapOf<Any, MutableSet<Disposable>>()

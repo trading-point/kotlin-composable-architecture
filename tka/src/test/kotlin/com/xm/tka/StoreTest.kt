@@ -8,6 +8,8 @@ import com.xm.tka.StoreTest.Action2.End
 import com.xm.tka.StoreTest.Action2.Next1
 import com.xm.tka.StoreTest.Action2.Next2
 import com.xm.tka.StoreTest.Action2.Tap
+import com.xm.tka.StoreTest.Action3.Incr
+import com.xm.tka.StoreTest.Action3.Noop
 import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.schedulers.TestScheduler
@@ -221,5 +223,26 @@ class StoreTest {
         store.send(Tap)
 
         assertEquals(listOf(1, 2, 3, 4), values)
+    }
+
+    sealed class Action3 {
+        object Incr : Action3()
+        object Noop : Action3()
+    }
+
+    @Test
+    fun testLotsOfSynchronousActions() {
+        val reducer = Reducer<Int, Action3, Unit> { state, action, _ ->
+            when (action) {
+                Incr -> (state + 1).let {
+                    if (it >= 100_000) it + just<Action3>(Noop) else it + just<Action3>(Incr)
+                }
+                Noop -> state + none()
+            }
+        }
+
+        val store = Store(0, reducer, Unit)
+        store.send(Incr)
+        assertEquals(100_000, store.view().currentState)
     }
 }

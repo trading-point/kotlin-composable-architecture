@@ -80,4 +80,28 @@ class EffectsTest {
             .assertNoErrors()
             .assertValues(1, 2, 3, 4)
     }
+
+    @Test
+    fun testEffectSubscriberInitializer_WithCancellation() {
+        val cancelId = "id"
+
+        val scheduler = TestScheduler()
+
+        val effect = Observable.create<Int> { observer ->
+            observer.onNext(1)
+
+            scheduler.scheduleDirect({
+                observer.onNext(2)
+            }, 1, SECONDS)
+        }.cancellable(cancelId)
+
+        effect
+            .test()
+            .assertValue(1)
+            .assertNotComplete()
+            .also { Effects.cancel<Int>(cancelId).subscribe() }
+            .also { scheduler.advanceTimeBy(1, SECONDS) }
+            .assertValue(1)
+            .assertComplete()
+    }
 }

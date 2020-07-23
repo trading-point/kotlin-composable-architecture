@@ -6,6 +6,7 @@ import com.xm.tka.ComposableArchitectureTests.Action.Start
 import com.xm.tka.ComposableArchitectureTests.CounterAction.IncrAndSquareLater
 import com.xm.tka.ComposableArchitectureTests.CounterAction.IncrNow
 import com.xm.tka.ComposableArchitectureTests.CounterAction.SquareNow
+import com.xm.tka.Effects.cancel
 import com.xm.tka.Effects.fireAndForget
 import com.xm.tka.Effects.just
 import com.xm.tka.Effects.merge
@@ -130,6 +131,58 @@ class ComposableArchitectureTests {
             `do` { subject.onNext(Unit) },
             receive(Incr) { 2 },
             send(End)
+        )
+    }
+
+    sealed class Action2 {
+        object Cancel : Action2()
+        object Incr : Action2()
+        data class Response(val value: Int) : Action2()
+    }
+
+    interface Environment2 {
+        val fetch: (Int) -> Effect<Int>
+        val scheduler: Scheduler
+    }
+
+    @Test
+    fun testCancellation() {
+        val cancelId = "id"
+
+        val reducer = Reducer<Int, Action2, Environment2> { state, action, environment ->
+            when (action) {
+                Action2.Cancel -> state + cancel(cancelId)
+                Action2.Incr -> (state + 1).let { newState ->
+                    newState + environment.fetch(newState)
+                        .observeOn(environment.scheduler)
+                        .map<Action2> { Action2.Response(it) }
+                        .cancellable(cancelId)
+                }
+                is Action2.Response -> action.value + none()
+            }
+        }
+
+        val scheduler = TestScheduler()
+
+        val store = TestStore(
+            0,
+            reducer,
+            object : Environment2 {
+                override val fetch: (Int) -> Effect<Int> = { just(it * it) }
+                override val scheduler: Scheduler = scheduler
+            }
+        )
+
+        store.assert(
+            send(Action2.Incr) { 1 },
+            `do` { scheduler.triggerActions() },
+            receive(Action2.Response(1)) { 1 }
+        )
+
+        store.assert(
+            send(Action2.Incr) { 2 },
+            send(Action2.Cancel),
+            `do` { scheduler.triggerActions() }
         )
     }
 }
