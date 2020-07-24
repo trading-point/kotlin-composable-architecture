@@ -111,6 +111,8 @@ class StoreTest {
             }
             .subscribe { childStore ->
                 childStore.state.subscribe { outputs.add(it) }
+                    // In RxJava we need to manually dispose at this point otherwise the subscription will leak
+                    .dispose()
             }
 
         parentStore.send(0)

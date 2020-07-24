@@ -20,11 +20,22 @@ import java.util.LinkedList
  */
 class Store<STATE : Any, ACTION : Any> private constructor(
     initialState: STATE,
-    private val reducer: (STATE, ACTION) -> Reduced<STATE, ACTION>
+    private val reducer: (STATE, ACTION) -> Reduced<STATE, ACTION>,
+    parentStream: Observable<STATE> = Observable.never()
 ) {
 
     private val _state: BehaviorSubject<STATE> = BehaviorSubject.createDefault(initialState)
-    internal val state: Observable<STATE> = _state.hide().distinctUntilChanged()
+        .apply {
+            parentStream
+                // don't delegate onError events
+                .onErrorResumeNext(Observable.never())
+                // don't delegate onComplete events
+                .concatWith(Observable.never())
+                // forward events to subject
+                .subscribe(this)
+        }
+    internal val state: Observable<STATE> = _state.hide()
+        .distinctUntilChanged()
     internal val currentState: STATE
         get() = requireNotNull(_state.value)
 
@@ -86,8 +97,9 @@ This can happen for a few reasons:
     }
 
     fun dispose() {
-        parentDisposable?.dispose()
-        effectDisposables.forEach { (_, disposable) -> disposable.dispose() }
+        effectDisposables
+            .apply { forEach { (_, disposable) -> disposable.dispose() } }
+            .clear()
     }
 
     //region Scopes
@@ -111,13 +123,9 @@ This can happen for a few reasons:
                 fromLocalAction(action).let(::send)
                 // get a new local value
                 Reduced(toLocalState(currentState), none())
-            }
-        ).also { localStore ->
-            // TODO Verify the absence of WeakReference causes no leaks
-            localStore.parentDisposable = _state.subscribe { state ->
-                localStore._state.onNext(toLocalState(state))
-            }
-        }
+            },
+            parentStream = _state.map { toLocalState(it) }
+        )
 
     /**
      * Scopes the store to one that exposes local state.
@@ -148,10 +156,6 @@ This can happen for a few reasons:
             toLocalState(Observable.just(it)).blockingFirst(null)
         }
 
-        // hold the disposable of the previous emitted store to dispose it before emitting the next
-        // "fix" for testScopeWithPublisherTransform
-        var previousEmissionDisposable: Disposable? = null
-
         return toLocalState(_state)
             .map { localState ->
                 Store<LOCAL_STATE, LOCAL_ACTION>(
@@ -164,16 +168,11 @@ This can happen for a few reasons:
                             extractLocalState(this@Store.currentState) ?: state,
                             none()
                         )
-                    }
-                ).also { localStore ->
-                    previousEmissionDisposable?.dispose()
-                    // TODO Verify the absence of WeakReference causes no leaks
-                    localStore.parentDisposable = _state.subscribe { state ->
-                        localStore._state.onNext(
-                            extractLocalState(state) ?: localStore.currentState
-                        )
-                    }.also { previousEmissionDisposable = it }
-                }
+                    },
+                    parentStream = _state.map { extractLocalState(it).toOptional() }
+                        .filter { it.isPresent }
+                        .map { it.get() }
+                )
             }
     }
 
