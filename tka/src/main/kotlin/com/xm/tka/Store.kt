@@ -187,6 +187,36 @@ This can happen for a few reasons:
     ): Observable<Store<LOCAL_STATE, ACTION>> = scopes(toLocalState, { it })
 
     /**
+     * Scopes the store to one that exposes local optional state and actions.
+     *
+     * This can be useful for deriving new stores to hand to child views in an application.
+     *
+     * @param toLocalState: An optic that transforms [STATE] into an optional [LOCAL_STATE].
+     * @param fromLocalAction: An optic that transforms [LOCAL_ACTION] into [ACTION].
+     * @return A new store with its domain (state and action) transformed.
+     */
+    fun <LOCAL_STATE : Any, LOCAL_ACTION : Any> optional(
+        toLocalState: Getter<STATE, LOCAL_STATE?>,
+        fromLocalAction: Getter<LOCAL_ACTION, ACTION>
+    ): Store<Optional<LOCAL_STATE>, LOCAL_ACTION> = scope(
+        { toLocalState(it).toOptional() },
+        fromLocalAction
+    )
+
+    /**
+     * Scopes the store to one that exposes optional local state.
+     *
+     * @param toLocalState: An optic that transforms [STATE] into an optional [LOCAL_STATE].
+     * @return A new store with its domain (state and action) transformed.
+     */
+    fun <LOCAL_STATE : Any> optional(
+        toLocalState: Getter<STATE, LOCAL_STATE?>
+    ): Store<Optional<LOCAL_STATE>, ACTION> = scope(
+        { toLocalState(it).toOptional() },
+        { it }
+    )
+
+    /**
      * Returns a "stateless" store by erasing state to [Unit].
      */
     val stateless: Store<Unit, ACTION>
