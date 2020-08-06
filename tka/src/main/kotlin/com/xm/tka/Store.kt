@@ -3,6 +3,7 @@
 package com.xm.tka
 
 import com.xm.tka.Effects.none
+import com.xm.tka.Optional.Companion.toOptional
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
