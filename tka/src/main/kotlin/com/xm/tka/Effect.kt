@@ -3,6 +3,8 @@
 package com.xm.tka
 
 import com.xm.tka.Effects.cancel
+import com.xm.tka.Effects.just
+import com.xm.tka.Effects.none
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -114,9 +116,14 @@ fun <ACTION> Single<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
 fun <ACTION> Maybe<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
 
 /**
- * Turns any [Completable] into an `Effect`
+ * Turns any [Completable] into a [none] `Effect`
  */
-fun <ACTION> Completable.toEffect(): Effect<ACTION> = this.andThen(Observable.empty<ACTION>())
+fun <ACTION> Completable.toEffect(): Effect<ACTION> = this.andThen(none())
+
+/**
+ * Turns any [Completable] into a [just] `Effect`
+ */
+fun <ACTION> Completable.toEffect(action: ACTION): Effect<ACTION> = this.andThen(just(action))
 
 /**
  * Turns an effect into one that is capable of being canceled.
