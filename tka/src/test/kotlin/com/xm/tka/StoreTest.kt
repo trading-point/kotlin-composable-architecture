@@ -12,6 +12,7 @@ import com.xm.tka.StoreTest.Action3.Incr
 import com.xm.tka.StoreTest.Action3.Noop
 import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
+import com.xm.tka.ui.ifLet
 import io.reactivex.schedulers.TestScheduler
 import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.Assert.assertEquals
@@ -244,5 +245,81 @@ class StoreTest {
         val store = Store(0, reducer, Unit)
         store.send(Incr)
         assertEquals(100_000, store.view().currentState)
+    }
+
+    data class AppState(
+        val count: Int? = null
+    )
+
+    data class AppAction(val count: Int?)
+
+    @Test
+    fun testIfLetAfterScope() {
+        val reducer = Reducer<AppState, AppAction, Unit> { state, action, _ ->
+            state.copy(count = action.count) + none()
+        }
+
+        val outputs = mutableListOf<Int?>()
+        val stores = mutableListOf<Any>()
+
+        val parentStore = Store(AppState(), reducer, Unit)
+        parentStore
+            .optional { it.count }
+            .ifLet(
+                unwrap = {
+                    stores.add(it)
+                    outputs.add(it.currentState)
+                },
+                orElse = {
+                    outputs.add(null)
+                }
+            )
+
+        assertEquals(listOf(null), outputs)
+
+        parentStore.send(AppAction(1))
+        assertEquals(listOf(null, 1), outputs)
+
+        parentStore.send(AppAction(null))
+        assertEquals(listOf(null, 1, null), outputs)
+
+        parentStore.send(AppAction(1))
+        assertEquals(listOf(null, 1, null, 1), outputs)
+
+        parentStore.send(AppAction(null))
+        assertEquals(listOf(null, 1, null, 1, null), outputs)
+
+        parentStore.send(AppAction(1))
+        assertEquals(listOf(null, 1, null, 1, null, 1), outputs)
+
+        parentStore.send(AppAction(null))
+        assertEquals(listOf(null, 1, null, 1, null, 1, null), outputs)
+    }
+
+    @Test
+    fun testIfLetTwo() {
+        val parentStore = Store(
+            initialState = AppState(0),
+            reducer = Reducer<AppState, Boolean, Unit> { state, action, _ ->
+                if (action) {
+                    state.copy(count = state.count?.let { it + 1 }) + none()
+                } else {
+                    state + just(true)
+                }
+            },
+            environment = Unit
+        )
+
+        parentStore.optional { it.count }
+            .ifLet {
+                val vs = it.view()
+
+                vs.states
+                    .test()
+                    .also { vs.send(false) }
+                    .also { vs.send(false) }
+                    .also { vs.send(false) }
+                    .assertValueAt(3, 3)
+            }
     }
 }

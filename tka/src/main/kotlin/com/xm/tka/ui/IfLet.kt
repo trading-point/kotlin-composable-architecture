@@ -3,6 +3,7 @@ package com.xm.tka.ui
 import com.xm.tka.Optional
 import com.xm.tka.Store
 import io.reactivex.annotations.CheckReturnValue
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 
 /**
@@ -24,14 +25,25 @@ import io.reactivex.disposables.Disposable
 fun <STATE : Any, ACTION : Any> Store<Optional<STATE>, ACTION>.ifLet(
     unwrap: (Store<STATE, ACTION>) -> Unit,
     orElse: () -> Unit
-): Disposable = scopes { states ->
-    states
-        .distinctUntilChanged { s1, s2 -> (s1.isPresent) == (s2.isPresent) }
-        .doOnNext { if (it.isPresent.not()) orElse() }
-        .filter { it.isPresent }
-        .map { it.get() }
-}.subscribe {
-    unwrap(it)
+): Disposable {
+    val elseDisposable = scopes { states ->
+        states.distinctUntilChanged { s1, s2 -> (s1.isPresent) == (s2.isPresent) }
+    }.subscribe {
+        if (it.currentState.isPresent.not()) orElse()
+    }
+
+    val unwrapDisposable = scopes { states ->
+        states.distinctUntilChanged { s1, s2 -> (s1.isPresent) == (s2.isPresent) }
+            .filter { it.isPresent }
+            .map { it.get() }
+    }.subscribe {
+        unwrap(it)
+    }
+
+    return CompositeDisposable().apply {
+        add(elseDisposable)
+        add(unwrapDisposable)
+    }
 }
 
 /**
