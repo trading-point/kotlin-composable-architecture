@@ -35,7 +35,7 @@ fun <STATE : Any, ACTION : Any> Store<Optional<STATE>, ACTION>.ifLet(
     val unwrapDisposable = scopes { states ->
         states.distinctUntilChanged { s1, s2 -> (s1.isPresent) == (s2.isPresent) }
             .filter { it.isPresent }
-            .map { it.get() }
+            .map { it.orNull()!! }
     }.subscribe {
         unwrap(it)
     }

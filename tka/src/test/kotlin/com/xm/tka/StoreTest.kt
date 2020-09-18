@@ -4,18 +4,20 @@ import com.xm.tka.Effects.fireAndForget
 import com.xm.tka.Effects.just
 import com.xm.tka.Effects.merge
 import com.xm.tka.Effects.none
+import com.xm.tka.Optional.Companion.toOptional
 import com.xm.tka.StoreTest.Action2.End
 import com.xm.tka.StoreTest.Action2.Next1
 import com.xm.tka.StoreTest.Action2.Next2
 import com.xm.tka.StoreTest.Action2.Tap
 import com.xm.tka.StoreTest.Action3.Incr
 import com.xm.tka.StoreTest.Action3.Noop
-import com.xm.tka.ui.ViewStore
+import com.xm.tka.ui.OptionalViewStore.Companion.optionalView
 import com.xm.tka.ui.ViewStore.Companion.view
 import com.xm.tka.ui.ifLet
 import io.reactivex.schedulers.TestScheduler
 import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class StoreTest {
@@ -67,7 +69,7 @@ class StoreTest {
             (state + 1) + none()
         }
         val parentStore = Store(0, counterReducer, Unit)
-        val parentViewStore = ViewStore(parentStore)
+        val parentViewStore = parentStore.view()
         val childStore = parentStore.scope { "$it" }
 
         childStore.state
@@ -321,5 +323,36 @@ class StoreTest {
                     .also { vs.send(false) }
                     .assertValueAt(3, 3)
             }
+    }
+
+    @Test
+    fun testOptionalView() {
+        val parentStore = Store(
+            initialState = AppState(null),
+            reducer = Reducer<AppState, Boolean, Unit> { state, action, _ ->
+                if (action) {
+                    state.copy(count = state.count?.let { it + 1 }) + none()
+                } else {
+                    state + just(true)
+                }
+            },
+            environment = Unit
+        )
+
+        val optionalStore = parentStore.optional { it.count }
+
+        val view = optionalStore.view()
+        assertNull(view.currentState.orNull())
+        view.states.test()
+            .assertValues(null.toOptional())
+            .assertNotComplete()
+            .assertNoErrors()
+
+        val optionalView = optionalStore.optionalView()
+        assertNull(optionalView.currentState)
+        optionalView.states.test()
+            .assertNoValues()
+            .assertNotComplete()
+            .assertNoErrors()
     }
 }

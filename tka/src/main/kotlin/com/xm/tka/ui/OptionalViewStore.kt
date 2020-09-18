@@ -2,6 +2,8 @@
 
 package com.xm.tka.ui
 
+import com.xm.tka.Optional
+import com.xm.tka.Optional.Companion.toOptional
 import com.xm.tka.Store
 import io.reactivex.Observable
 
@@ -10,18 +12,22 @@ import io.reactivex.Observable
  * commonly used in views but they can be used anywhere it makes sense to observe state
  * and send actions.
  *
- * Source: https://github.com/pointfreeco/swift-composable-architecture/blob/main/Sources/ComposableArchitecture/ViewStore.swift
+ * [OptionalViewStore] is a special kind of [ViewStore] that operates on a `Store<Optional<STATE>` and emits only
+ * non-optional states
  */
-class ViewStore<STATE : Any, ACTION : Any>(
-    store: Store<STATE, ACTION>,
+class OptionalViewStore<STATE : Any, ACTION : Any>(
+    store: Store<Optional<STATE>, ACTION>,
     removeDuplicates: (STATE, STATE) -> Boolean
 ) {
 
-    constructor(store: Store<STATE, ACTION>) : this(store, { s1, s2 -> s1 == s2 })
+    constructor(store: Store<Optional<STATE>, ACTION>) : this(store, { s1, s2 -> s1 == s2 })
 
-    var currentState: STATE = store.currentState
+    var currentState: Optional<STATE> = store.currentState
 
-    val states: Observable<STATE> = store.state.distinctUntilChanged(removeDuplicates)
+    val states: Observable<STATE> = store.state
+        .filter { it.isPresent }
+        .map { it.orNull()!! }
+        .distinctUntilChanged(removeDuplicates)
 
     /**
      * Sends an action to the store.
@@ -34,19 +40,18 @@ class ViewStore<STATE : Any, ACTION : Any>(
      */
     val send: (ACTION) -> Unit = { store.send(it) }
 
-    private val viewDisposable = states.subscribe { currentState = it }
+    private val viewDisposable = states.subscribe { currentState = it.toOptional() }
 
     fun dispose() {
         viewDisposable.dispose()
     }
 
     companion object {
-        fun <STATE : Any, ACTION : Any> Store<STATE, ACTION>.view(): ViewStore<STATE, ACTION> =
-            ViewStore(this)
+        fun <STATE : Any, ACTION : Any> Store<Optional<STATE>, ACTION>.optionalView():
+            OptionalViewStore<STATE, ACTION> = OptionalViewStore(this)
 
-        fun <STATE : Any, ACTION : Any> Store<STATE, ACTION>.view(
+        fun <STATE : Any, ACTION : Any> Store<Optional<STATE>, ACTION>.optionalView(
             removeDuplicates: (STATE, STATE) -> Boolean
-        ): ViewStore<STATE, ACTION> =
-            ViewStore(this, removeDuplicates)
+        ): OptionalViewStore<STATE, ACTION> = OptionalViewStore(this, removeDuplicates)
     }
 }

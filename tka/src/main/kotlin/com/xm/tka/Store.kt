@@ -171,7 +171,7 @@ This can happen for a few reasons:
                     },
                     parentStream = _state.map { extractLocalState(it).toOptional() }
                         .filter { it.isPresent }
-                        .map { it.get() }
+                        .map { it.orNull()!! }
                 )
             }
     }
