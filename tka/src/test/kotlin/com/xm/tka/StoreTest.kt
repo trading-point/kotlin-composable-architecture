@@ -17,6 +17,7 @@ import com.xm.tka.ui.ifLet
 import io.reactivex.schedulers.TestScheduler
 import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 
@@ -349,7 +350,7 @@ class StoreTest {
             .assertNoErrors()
 
         val optionalView = optionalStore.optionalView()
-        assertNull(optionalView.currentState)
+        assertNotNull(optionalView.currentState)
         optionalView.states.test()
             .assertNoValues()
             .assertNotComplete()
