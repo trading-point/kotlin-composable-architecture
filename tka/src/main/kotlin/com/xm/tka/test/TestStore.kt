@@ -88,15 +88,12 @@ before sending an action.
 Unhandled actions: $receivedActions
                         """
                     }
-
-                    val initialState = toLocalState(state)
                     runReducer(fromLocalAction(type.localAction))
-                    val actualState = toLocalState(state)
-
-                    // If update function is provided assert expected result
-                    type.update?.run {
-                        assertState(invoke(initialState), actualState)
-                    }
+                    val expectedState = toLocalState(state)
+                    type.update(expectedState)
+                        .also {
+                            assertState(expectedState, it)
+                        }
                 }
                 is Receive -> {
                     assert(receivedActions.any()) {
@@ -112,14 +109,12 @@ Received unexpected action
     Actual:   $receivedAction.
                         """
                     }
-                    val initialState = toLocalState(state)
                     runReducer(receivedAction)
-                    val actualState = toLocalState(state)
-
-                    // If update function is provided assert expected result
-                    type.update?.run {
-                        assertState(invoke(initialState), actualState)
-                    }
+                    val expectedState = toLocalState(state)
+                    type.update(expectedState)
+                        .also {
+                            assertState(expectedState, it)
+                        }
                 }
                 is Environment -> {
                     assert(receivedActions.none()) {
@@ -132,7 +127,6 @@ before sending an action.
                     type.work(environment)
                 }
             }
-
         }
 
         assert(receivedActions.none()) {
@@ -176,12 +170,12 @@ State change does not match expectation
         internal sealed class Type<out STATE, out LOCAL_STATE, out ACTION, out LOCAL_ACTION, out ENVIRONMENT> {
             data class Send<LOCAL_STATE, LOCAL_ACTION>(
                 val localAction: LOCAL_ACTION,
-                val update: ((LOCAL_STATE) -> LOCAL_STATE)?
+                val update: (LOCAL_STATE) -> LOCAL_STATE
             ) : Type<Nothing, LOCAL_STATE, Nothing, LOCAL_ACTION, Nothing>()
 
             data class Receive<LOCAL_STATE, ACTION>(
                 val expectedAction: ACTION,
-                val update: ((LOCAL_STATE) -> LOCAL_STATE)?
+                val update: (LOCAL_STATE) -> LOCAL_STATE
             ) : Type<Nothing, LOCAL_STATE, ACTION, Nothing, Nothing>()
 
             data class Environment<ENVIRONMENT>(
@@ -195,13 +189,13 @@ State change does not match expectation
              * is expected to change.
              *
              * @param action: An action to send to the test store.
-             * @param update: An optional function that describes how the test store's state is expected to change.
+             * @paramupdate: A function that describes how the test store's state is expected to change.
              * @return A step that describes an action sent to a store and asserts against how the
              * store's state is expected to change.
              */
             fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> send(
                 action: LOCAL_ACTION,
-                update: ((LOCAL_STATE) -> LOCAL_STATE)? = null
+                update: (LOCAL_STATE) -> LOCAL_STATE = { it }
             ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
                 Step(Send(action, update))
 
@@ -210,13 +204,13 @@ State change does not match expectation
              * state is expected to change.
              *
              * @param action: An action the test store should receive by evaluating an effect.
-             * @param update: An optional function that describes how the test store's state is expected to change.
+             * @param update: A function that describes how the test store's state is expected to change.
              * @return A step that describes an action received by an effect and asserts against how
              * the store's state is expected to change.
              */
             fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> receive(
                 action: ACTION,
-                update: ((LOCAL_STATE) -> LOCAL_STATE)? = null
+                update: (LOCAL_STATE) -> LOCAL_STATE = { it }
             ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
                 Step(Receive(action, update))
 

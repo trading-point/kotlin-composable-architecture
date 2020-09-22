@@ -46,7 +46,7 @@ class ComposableArchitectureTests {
         }
 
         val scheduler = TestScheduler()
-        val store = TestStore(0, counterReducer, scheduler)
+        val store = TestStore(2, counterReducer, scheduler)
 
         store.assert(
             send(IncrAndSquareLater),
