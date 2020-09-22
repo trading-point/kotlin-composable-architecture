@@ -78,7 +78,7 @@ class TestStore<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> private c
             if (isComplete.not()) disposables.add(disposable)
         }
 
-        steps.forEach { step ->
+        steps.forEachIndexed { index, step ->
             when (val type = step.type) {
                 is Send -> {
                     assert(receivedActions.none()) {
@@ -88,9 +88,10 @@ before sending an action.
 Unhandled actions: $receivedActions
                         """
                     }
+                    val initialState = toLocalState(state)
                     runReducer(fromLocalAction(type.localAction))
-                    val expectedState = toLocalState(state)
-                    type.update(expectedState)
+                    val actualState = toLocalState(state)
+                    assertState(index + 1, type, type.update(initialState), actualState)
                 }
                 is Receive -> {
                     assert(receivedActions.any()) {
@@ -106,9 +107,10 @@ Received unexpected action
     Actual:   $receivedAction.
                         """
                     }
+                    val initialState = toLocalState(state)
                     runReducer(receivedAction)
-                    val expectedState = toLocalState(state)
-                    type.update(expectedState)
+                    val actualState = toLocalState(state)
+                    assertState(index + 1, type, type.update(initialState), actualState)
                 }
                 is Environment -> {
                     assert(receivedActions.none()) {
@@ -120,16 +122,6 @@ before sending an action.
                     }
                     type.work(environment)
                 }
-            }
-
-            val actualState = toLocalState(state)
-            val expectedState = toLocalState(state)
-            assert(expectedState == actualState) {
-                """
-State change does not match expectation
-    Expected: $expectedState
-    Actual:   $actualState
-                """
             }
         }
 
@@ -151,6 +143,21 @@ This can happen for a few reasons:
   ensure those effects are completed by returning an `Effect.cancel` effect from a 
   particular action in your reducer, and sending that action in the test. 
             """
+        }
+    }
+
+    private fun assertState(
+        step: Int,
+        type: Step.Type<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT>,
+        expected: LOCAL_STATE,
+        actual: LOCAL_STATE
+    ) {
+        assert(expected == actual) {
+            """
+State change on step $step: $type does not match expectation
+    Expected: $expected
+    Actual:   $actual
+            """.trim()
         }
     }
 
