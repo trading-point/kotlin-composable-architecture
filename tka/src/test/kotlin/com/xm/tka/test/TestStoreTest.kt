@@ -7,8 +7,8 @@ import com.xm.tka.test.TestStore.Step.Companion.receive
 import com.xm.tka.test.TestStore.Step.Companion.send
 import com.xm.tka.test.TestStoreTest.Action.Change
 import com.xm.tka.test.TestStoreTest.Action.Result
-import org.junit.Test
 import java.lang.AssertionError
+import org.junit.Test
 
 private const val INITIAL_STATE = 0
 private const val CHANGED_STATE = 1
