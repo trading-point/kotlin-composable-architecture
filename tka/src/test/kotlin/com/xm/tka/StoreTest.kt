@@ -209,11 +209,11 @@ class StoreTest {
         val values = mutableListOf<Int>()
         val counterReducer = Reducer<Unit, Action2, Unit> { state, action, _ ->
             when (action) {
-                Tap -> state + merge<Action2>(
+                Tap -> state + merge(
                     just(Next1),
                     just(Next2),
                     fireAndForget { values.add(1) })
-                Next1 -> state + merge<Action2>(
+                Next1 -> state + merge(
                     just(End),
                     fireAndForget { values.add(2) }
                 )
@@ -239,7 +239,7 @@ class StoreTest {
         val reducer = Reducer<Int, Action3, Unit> { state, action, _ ->
             when (action) {
                 Incr -> (state + 1).let {
-                    if (it >= 100_000) it + just<Action3>(Noop) else it + just<Action3>(Incr)
+                    if (it >= 100_000) it + just(Noop) else it + just(Incr)
                 }
                 Noop -> state + none()
             }

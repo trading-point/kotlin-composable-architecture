@@ -98,7 +98,7 @@ This can happen for a few reasons:
 
     fun dispose() {
         effectDisposables
-            .apply { forEach { (_, disposable) -> disposable.dispose() } }
+            .onEach { (_, disposable) -> disposable.dispose() }
             .clear()
     }
 
@@ -116,7 +116,7 @@ This can happen for a few reasons:
         toLocalState: Getter<STATE, LOCAL_STATE>,
         fromLocalAction: Getter<LOCAL_ACTION, ACTION>
     ): Store<LOCAL_STATE, LOCAL_ACTION> =
-        Store<LOCAL_STATE, LOCAL_ACTION>(
+        Store(
             initialState = toLocalState(currentState),
             reducer = { _, action ->
                 // force store to internally mutate it's value
@@ -158,7 +158,7 @@ This can happen for a few reasons:
 
         return toLocalState(_state)
             .map { localState ->
-                Store<LOCAL_STATE, LOCAL_ACTION>(
+                Store(
                     initialState = localState,
                     reducer = { state, action ->
                         // force store to internally mutate it's value
@@ -221,7 +221,7 @@ This can happen for a few reasons:
      */
     val stateless: Store<Unit, ACTION>
         get() = scope(
-            toLocalState = { Unit }
+            toLocalState = { }
         )
 
     /**

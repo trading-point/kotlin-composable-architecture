@@ -25,7 +25,7 @@ class TestStoreTest {
     @Test
     fun testSendSuccessful() {
 
-        val store = TestStore(INITIAL_STATE, Reducer<Int, Action, Unit> { state, _, _ ->
+        val store = TestStore(INITIAL_STATE, Reducer<Int, Action, Unit> { _, _, _ ->
             CHANGED_STATE + none()
         }, Unit)
 
@@ -39,7 +39,7 @@ class TestStoreTest {
     @Test(expected = AssertionError::class)
     fun testSendFailAsserted() {
 
-        val store = TestStore(INITIAL_STATE, Reducer<Int, Action, Unit> { state, _, _ ->
+        val store = TestStore(INITIAL_STATE, Reducer<Int, Action, Unit> { _, _, _ ->
             CHANGED_STATE + none()
         }, Unit)
 

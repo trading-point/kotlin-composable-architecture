@@ -132,11 +132,11 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
         ): Reducer<STATE, ACTION, ENVIRONMENT> =
             Reducer { state, action, environment ->
                 // apply all reducers on the state
-                reducers.fold(state + none(), { (state, effect), reducer ->
+                reducers.fold(state + none()) { (state, effect), reducer ->
                     reducer.reduce(state, action, environment)
                         // send the final state with the accumulated side-effects
                         .let { (newState, newEffect) -> newState + (effect + newEffect) }
-                })
+                }
             }
 
         /**
