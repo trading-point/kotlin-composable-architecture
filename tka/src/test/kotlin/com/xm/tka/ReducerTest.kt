@@ -35,13 +35,13 @@ class ReducerTest {
     fun testCombine_EffectsAreMerged() {
         var fastValue: Int? = null
         val fastReducer = Reducer<Int, Action, Scheduler> { state, _, environment ->
-            (state + 1) + Effects.fireAndForget<Action> { fastValue = 42 }
+            (state + 1) + fireAndForget<Action> { fastValue = 42 }
                 .delay(1, SECONDS, environment)
         }
 
         var slowValue: Int? = null
         val slowReducer = Reducer<Int, Action, Scheduler> { state, _, environment ->
-            (state + 1) + Effects.fireAndForget<Action> { slowValue = 1729 }
+            (state + 1) + fireAndForget<Action> { slowValue = 1729 }
                 .delay(2, SECONDS, environment)
         }
 
