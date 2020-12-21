@@ -40,30 +40,22 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         get() = requireNotNull(_state.value)
 
     private val synchronousActionsToSend: LinkedList<ACTION> = LinkedList()
+    private val bufferedActions: LinkedList<ACTION> = LinkedList()
     private var isSending: Boolean = false
 
     internal val effectDisposables: MutableMap<Long, Disposable> = mutableMapOf()
     private var id: Long = 0
 
     fun send(action: ACTION) {
-        synchronousActionsToSend.add(action)
+        if (!isSending) {
+            synchronousActionsToSend.add(action)
+        } else {
+            bufferedActions.add(action)
+            return
+        }
 
-        while (synchronousActionsToSend.any()) {
-            with(synchronousActionsToSend.pop()) {
-
-                assert(isSending.not()) {
-                    """
-The store was sent the action $this while it was already processing another action.
-This can happen for a few reasons:
-* The store was sent an action recursively. This can occur when you run an effect directly in the
-  reducer, rather than returning it from the reducer. Check the stack to find frames corresponding
-  to one of your reducers. That code should be refactored to not invoke the effect directly.
-* The store has been sent actions from multiple threads. The `send` method is not thread-safe, and 
-  should only ever be used from a single thread (typically the main thread). Instead of calling 
-  `send` from multiple threads you should use effects to process expensive computations on background
-  threads so that it can be fed back into the store.
-                    """
-                }
+        while (synchronousActionsToSend.any() || bufferedActions.any()) {
+            with(synchronousActionsToSend.removeFirstOrNull() ?: bufferedActions.removeFirst()) {
 
                 isSending = true
                 val (newState, effect) = reducer(currentState, this)
@@ -98,7 +90,7 @@ This can happen for a few reasons:
 
     fun dispose() {
         effectDisposables
-            .apply { forEach { (_, disposable) -> disposable.dispose() } }
+            .onEach { (_, disposable) -> disposable.dispose() }
             .clear()
     }
 
@@ -116,7 +108,7 @@ This can happen for a few reasons:
         toLocalState: Getter<STATE, LOCAL_STATE>,
         fromLocalAction: Getter<LOCAL_ACTION, ACTION>
     ): Store<LOCAL_STATE, LOCAL_ACTION> =
-        Store<LOCAL_STATE, LOCAL_ACTION>(
+        Store(
             initialState = toLocalState(currentState),
             reducer = { _, action ->
                 // force store to internally mutate it's value
@@ -158,7 +150,7 @@ This can happen for a few reasons:
 
         return toLocalState(_state)
             .map { localState ->
-                Store<LOCAL_STATE, LOCAL_ACTION>(
+                Store(
                     initialState = localState,
                     reducer = { state, action ->
                         // force store to internally mutate it's value
@@ -221,7 +213,7 @@ This can happen for a few reasons:
      */
     val stateless: Store<Unit, ACTION>
         get() = scope(
-            toLocalState = { Unit }
+            toLocalState = { }
         )
 
     /**
