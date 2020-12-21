@@ -43,7 +43,7 @@ object Effects {
      * An effect that does nothing and completes immediately. Useful for situations where you must
      * return an effect, but you don't need to do anything.
      */
-    fun <ACTION> none(): Effect<ACTION> = Observable.empty<ACTION>()
+    fun <ACTION> none(): Effect<ACTION> = Observable.empty()
 
     /**
      * Initializes an effect that immediately emits the value passed in.
@@ -57,7 +57,7 @@ object Effects {
      *
      * @param throwable: The error that is immediately emitted by the effect.
      */
-    fun <ACTION> error(throwable: Throwable): Effect<ACTION> = Observable.error<ACTION>(throwable)
+    fun <ACTION> error(throwable: Throwable): Effect<ACTION> = Observable.error(throwable)
 
     /**
      * Creates an effect that can supply a single value asynchronously in the future.

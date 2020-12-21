@@ -108,7 +108,7 @@ class ComposableArchitectureTests {
             when (action) {
                 End -> state + environment.stopEffect
                 Incr -> (state + 1) + none()
-                Start -> state + environment.startEffect.map<Action> { Incr }
+                Start -> state + environment.startEffect.map { Incr }
             }
         }
 
