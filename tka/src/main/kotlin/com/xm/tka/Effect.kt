@@ -14,8 +14,8 @@ import io.reactivex.Single
 import io.reactivex.disposables.Disposable
 import io.reactivex.disposables.Disposables
 import io.reactivex.subjects.PublishSubject
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedDeque
 
 /**
  * The `Effect` type encapsulates a unit of work that can be run in the outside world, and can feed
@@ -94,9 +94,7 @@ object Effects {
      * identifier.
      */
     fun <ACTION> cancel(id: Any): Effect<ACTION> = fireAndForget {
-        disposablesLock.withLock {
-            cancellationDisposables[id]?.forEach { it.dispose() }
-        }
+        cancellationDisposables[id]?.forEach { it.dispose() }
     }
 }
 
@@ -136,9 +134,8 @@ fun <ACTION> Completable.toEffect(action: ACTION): Effect<ACTION> = this.andThen
  * canceled before starting this new one.
  * @return A new effect that is capable of being canceled by an identifier.
  */
-fun <ACTION> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false): Effect<ACTION> {
-    val effect = Observable.defer<ACTION> {
-        disposablesLock.withLock { /*No-op*/ }
+fun <ACTION : Any> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false): Effect<ACTION> {
+    val effect = Observable.defer {
 
         val subject = PublishSubject.create<ACTION>()
         val values = mutableListOf<ACTION>()
@@ -149,20 +146,18 @@ fun <ACTION> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false
 
         var cancellationDisposable: Disposable? = null
         cancellationDisposable = Disposables.fromAction {
-            disposablesLock.withLock {
-                subject.onComplete()
-                disposable.dispose()
-                cancellationDisposables[id]
-                    ?.apply {
-                        remove(cancellationDisposable)
-                    }
-                    ?.ifEmpty {
-                        cancellationDisposables.remove(id)
-                    }
-            }
+            subject.onComplete()
+            disposable.dispose()
+            cancellationDisposables[id]
+                ?.apply {
+                    remove(cancellationDisposable)
+                }
+                ?.ifEmpty {
+                    cancellationDisposables.remove(id)
+                }
         }
 
-        cancellationDisposables.getOrPut(id) { mutableSetOf() }.add(cancellationDisposable)
+        cancellationDisposables.getOrPut(id) { ConcurrentLinkedDeque() }.add(cancellationDisposable)
 
         Observable.fromIterable(values)
             .concatWith(subject)
@@ -174,5 +169,4 @@ fun <ACTION> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false
     return if (cancelInFlight) concat(cancel(id), effect) else effect
 }
 
-private val disposablesLock = ReentrantLock()
-internal val cancellationDisposables = mutableMapOf<Any, MutableSet<Disposable>>()
+internal val cancellationDisposables = ConcurrentHashMap<Any, ConcurrentLinkedDeque<Disposable>>()
