@@ -13,18 +13,21 @@ fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.debug(
     prefix: String = "",
     printer: (String) -> Unit = { println(it) }
 ): Reducer<STATE, ACTION, ENVIRONMENT> = Reducer { state, action, environment ->
+    val pref = if (prefix.isEmpty()) prefix else prefix.plus(": ")
     kotlin.runCatching {
         reduce(state, action, environment)
             .also { (newState, _) ->
-                printer(
-                    """
-                        ${if (prefix.isEmpty()) prefix else prefix.plus(": ")}Received:
-                        State:   $state
-                        Action:  $action
-                        Reduced: $newState
+                pref
+                    .let {
+                        """
+                        ${it}Received:
+                        $it  State:   $state
+                        $it  Action:  $action
+                        $it  Reduced: $newState
                         """.trimIndent()
-                )
+                    }
+                    .also(printer)
             }
-    }.onFailure { printer("${if (prefix.isEmpty()) prefix else prefix.plus(": ")}${it.message}") }
+    }.onFailure { printer("$pref${it.message}") }
         .getOrThrow()
 }

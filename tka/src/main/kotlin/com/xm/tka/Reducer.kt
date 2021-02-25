@@ -209,25 +209,25 @@ fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.combinedWit
  * Transforms a reducer that works on non-optional state into one that works on optional state
  * by only running the non-optional reducer when state is non-null.
  */
-fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.optional(): Reducer<STATE?, ACTION, ENVIRONMENT> =
-    Reducer { state, action, environment ->
-        state
-            .also {
-                assert(it != null) {
-                    """
-                    $action was received by an optional reducer when its state was "null".
-                    This can happen for a few reasons:
-                    * The optional reducer was combined with or run from another reducer that set 
-                      $state to "null" before the optional reducer ran. Combine or run optional reducers
-                      before reducers that can set their state to "null". This ensures that optional 
-                      reducers can handle their actions while their state is still non-"null".
-                    * An active effect emitted this action while state was "null". Make sure that effects
-                      for this optional reducer are canceled when optional state is set to "null".
-                    * This action was sent to the store while state was "null". Make sure that actions
-                      for this reducer can only be sent to a view store when state is non-"null".
-                    """
-                }
+inline fun <reified STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.optional():
+    Reducer<STATE?, ACTION, ENVIRONMENT> = Reducer { state, action, environment ->
+    state
+        .also {
+            assert(it != null) {
+                """
+                $action was received by an optional reducer when its state was "null".
+                This can happen for a few reasons:
+                * The optional reducer was combined with or run from another reducer that set 
+                  ${STATE::class.java.simpleName} to "null" before the optional reducer ran. 
+                  Combine or run optional reducers before reducers that can set their state to "null". 
+                  This ensures that optional reducers can handle their actions while their state is still non-"null".
+                * An active effect emitted this action while state was "null". Make sure that effects
+                  for this optional reducer are canceled when optional state is set to "null".
+                * This action was sent to the store while state was "null". Make sure that actions
+                  for this reducer can only be sent to a view store when state is non-"null".
+                """
             }
-            ?.let { reduce(it, action, environment) }
-            ?: state + none()
-    }
+        }
+        ?.let { reduce(it, action, environment) }
+        ?: state + none()
+}
