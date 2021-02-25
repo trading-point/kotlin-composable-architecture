@@ -28,6 +28,9 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         .apply {
             parentStream
                 // don't delegate onError events
+                .doOnError {
+                    assert(true) { it }
+                }
                 .onErrorResumeNext(Observable.never())
                 // don't delegate onComplete events
                 .concatWith(Observable.never())
@@ -72,7 +75,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                         else send(it)
                     },
                     {
-                        // TODO("LOG)
+                        assert(true) { it }
                     },
                     {
                         didComplete = true
