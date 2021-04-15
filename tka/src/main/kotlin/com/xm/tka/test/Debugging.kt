@@ -11,7 +11,7 @@ import com.xm.tka.Reducer
  */
 fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.debug(
     prefix: String = "",
-    printer: (String) -> Unit = { println(it) }
+    printer: Printer = Printer()
 ): Reducer<STATE, ACTION, ENVIRONMENT> = Reducer { state, action, environment ->
     val pref = if (prefix.isEmpty()) prefix else prefix.plus(": ")
     kotlin.runCatching {
@@ -26,8 +26,22 @@ fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.debug(
                         $it  Reduced: $newState
                         """.trimIndent()
                     }
-                    .also(printer)
+                    .also(printer::print)
             }
-    }.onFailure { printer("$pref${it.message}") }
+    }.onFailure { printer.print("TKA: pref", it) }
         .getOrThrow()
+}
+
+interface Printer {
+
+    fun print(message: String, error: Throwable? = null)
+
+    companion object {
+        operator fun invoke(): Printer = object : Printer {
+            override fun print(message: String, error: Throwable?) {
+                if (error == null) println(message)
+                else System.err.println("$message: $error")
+            }
+        }
+    }
 }

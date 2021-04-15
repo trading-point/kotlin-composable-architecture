@@ -44,7 +44,8 @@ class TestStore<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> private c
     private val reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
     private val environment: ENVIRONMENT,
     private val toLocalState: Getter<STATE, LOCAL_STATE>,
-    private val fromLocalAction: Getter<LOCAL_ACTION, ACTION>
+    private val fromLocalAction: Getter<LOCAL_ACTION, ACTION>,
+    private val printer: Printer
 ) {
 
     private var state: STATE = initialState
@@ -67,8 +68,10 @@ class TestStore<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> private c
                 {
                     receivedActions.add(it)
                 },
-                {
-                    // TODO("LOG)
+                { error ->
+                    printer.print("TKA: Store: effectDisposable", error)
+                    isComplete = true
+                    disposables.removeAll { it == disposable }
                 },
                 {
                     isComplete = true
@@ -251,13 +254,15 @@ State change on step $step: $type does not match expectation
         operator fun <STATE, ACTION, ENVIRONMENT> invoke(
             initialState: STATE,
             reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
-            environment: ENVIRONMENT
+            environment: ENVIRONMENT,
+            printer: Printer = Printer()
         ): TestStore<STATE, STATE, ACTION, ACTION, ENVIRONMENT> = TestStore(
             initialState,
             reducer,
             environment,
             { it },
-            { it }
+            { it },
+            printer
         )
     }
 }
