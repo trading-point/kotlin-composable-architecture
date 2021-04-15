@@ -4,6 +4,7 @@ package com.xm.tka
 
 import com.xm.tka.Effects.none
 import com.xm.tka.Optional.Companion.toOptional
+import com.xm.tka.test.Printer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
@@ -21,6 +22,7 @@ import java.util.LinkedList
 class Store<STATE : Any, ACTION : Any> private constructor(
     initialState: STATE,
     private val reducer: (STATE, ACTION) -> Reduced<STATE, ACTION>,
+    private val printer: Printer,
     parentStream: Observable<STATE> = Observable.never()
 ) {
 
@@ -28,7 +30,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         .apply {
             parentStream
                 // don't delegate onError events
-                .doOnError { println("TKA: Store: parentStream: $it") }
+                .doOnError { printer.print("TKA: Store: parentStream", it) }
                 .onErrorResumeNext(Observable.never())
                 // don't delegate onComplete events
                 .concatWith(Observable.never())
@@ -73,7 +75,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                         else send(it)
                     },
                     {
-                        println("TKA: Store: effectDisposable: $it")
+                        printer.print("TKA: Store: effectDisposable", it)
                         didComplete = true
                         effectDisposables.remove(id)
                     },
@@ -119,7 +121,8 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                 // get a new local value
                 Reduced(toLocalState(currentState), none())
             },
-            parentStream = _state.map { toLocalState(it) }
+            parentStream = _state.map { toLocalState(it) },
+            printer = printer
         )
 
     /**
@@ -166,7 +169,8 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                     },
                     parentStream = _state.map { extractLocalState(it).toOptional() }
                         .filter { it.isPresent }
-                        .map { it.orNull()!! }
+                        .map { it.orNull()!! },
+                    printer = printer
                 )
             }
     }
@@ -241,10 +245,12 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         operator fun <STATE : Any, ACTION : Any, ENVIRONMENT : Any> invoke(
             initialState: STATE,
             reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
-            environment: ENVIRONMENT
+            environment: ENVIRONMENT,
+            printer: Printer = Printer()
         ): Store<STATE, ACTION> = Store(
             initialState,
-            { state, action -> reducer.reduce(state, action, environment) }
+            { state, action -> reducer.reduce(state, action, environment) },
+            printer = printer
         )
     }
 }
