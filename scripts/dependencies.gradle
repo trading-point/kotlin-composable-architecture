@@ -10,13 +10,13 @@ ext {
 
     // https://github.com/JetBrains/kotlin/blob/1.4.20/ChangeLog.md
     libraries.kotlin = [:]
-    libraries.kotlin.version = '1.4.21'
+    libraries.kotlin.version = '1.5.31'
     libraries.kotlin.jdk = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${libraries.kotlin.version}"
 
     libraries.rx = [:]
 
-    // https://github.com/ReactiveX/RxJava/releases/tag/v2.2.20
-    libraries.rx.java = "io.reactivex.rxjava2:rxjava:2.2.20"
+    // https://github.com/ReactiveX/RxJava/releases/tag/v2.2.21
+    libraries.rx.java = "io.reactivex.rxjava2:rxjava:2.2.21"
 
     // https://github.com/junit-team/junit4/releases/tag/r4.13.1
     libraries.junit = "junit:junit:4.13.1"
@@ -24,19 +24,20 @@ ext {
 
     //region Classpaths
     classpaths = [:]
-    // https://developer.android.com/studio/releases/gradle-plugin#4-1-1
-    classpaths.gradle = "com.android.tools.build:gradle:4.1.1"
+    // https://developer.android.com/studio/releases/gradle-plugin#7-0-0
+    classpaths.gradle = "com.android.tools.build:gradle:7.0.2"
     classpaths.kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libraries.kotlin.version}"
-    // https://github.com/ben-manes/gradle-versions-plugin/releases/tag/v0.36.0
-    classpaths.versions = "com.github.ben-manes:gradle-versions-plugin:0.36.0"
-    // https://detekt.github.io/detekt/changelog.html#1120
-    classpaths.detekt = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.12.0"
+    // https://github.com/ben-manes/gradle-versions-plugin/releases/tag/v0.38.0
+    classpaths.versions = "com.github.ben-manes:gradle-versions-plugin:0.38.0"
+    // https://detekt.github.io/detekt/changelog.html#1181---2021-08-30
+    classpaths.detekt = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.18.1"
     //endregion
 
     //region Repositories
     repos = {
         google()
-        jcenter()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     //endregion
 }
