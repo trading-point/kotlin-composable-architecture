@@ -28,7 +28,7 @@ fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.debug(
                     }
                     .also(printer::print)
             }
-    }.onFailure { printer.print("TKA: pref", it) }
+    }.onFailure { printer.print("TKA: $prefix", it) }
         .getOrThrow()
 }
 
