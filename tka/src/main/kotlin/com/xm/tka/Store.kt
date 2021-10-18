@@ -38,7 +38,6 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                 .subscribe(this)
         }
     internal val state: Observable<STATE> = _state.hide()
-        .distinctUntilChanged()
     internal val currentState: STATE
         get() = requireNotNull(_state.value)
 
@@ -88,6 +87,8 @@ class Store<STATE : Any, ACTION : Any> private constructor(
 
                 if (didComplete.not()) {
                     effectDisposables[id] = effectDisposable
+                } else {
+                    effectDisposable.dispose()
                 }
             }
         }
