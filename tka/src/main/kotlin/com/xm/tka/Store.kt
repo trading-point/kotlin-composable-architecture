@@ -60,9 +60,12 @@ class Store<STATE : Any, ACTION : Any> private constructor(
             with(synchronousActionsToSend.removeFirstOrNull() ?: bufferedActions.removeFirst()) {
 
                 isSending = true
-                val (newState, effect) = reducer(currentState, this)
+                val (newState, effect) = try {
+                    reducer(currentState, this)
+                } finally {
+                    isSending = false
+                }
                 _state.onNext(newState)
-                isSending = false
 
                 var didComplete = false
                 val id = id.inc()
