@@ -8,7 +8,7 @@ import com.xm.tka.test.Printer
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
-import java.util.LinkedList
+import java.util.concurrent.LinkedBlockingDeque
 
 /**
  * A store represents the runtime that powers the application. It is the object that you will pass
@@ -41,14 +41,13 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     internal val currentState: STATE
         get() = requireNotNull(_state.value)
 
-    private val synchronousActionsToSend: LinkedList<ACTION> = LinkedList()
-    private val bufferedActions: LinkedList<ACTION> = LinkedList()
+    private val synchronousActionsToSend: LinkedBlockingDeque<ACTION> = LinkedBlockingDeque()
+    private val bufferedActions: LinkedBlockingDeque<ACTION> = LinkedBlockingDeque()
     private var isSending: Boolean = false
 
     internal val effectDisposables: MutableMap<Long, Disposable> = mutableMapOf()
     private var id: Long = 0
 
-    @Synchronized
     fun send(action: ACTION) {
         if (!isSending) {
             synchronousActionsToSend.add(action)
@@ -58,7 +57,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         }
 
         while (synchronousActionsToSend.any() || bufferedActions.any()) {
-            with(synchronousActionsToSend.removeFirstOrNull() ?: bufferedActions.removeFirst()) {
+            with(synchronousActionsToSend.poll() ?: bufferedActions.poll() ?: continue) {
 
                 isSending = true
                 val (newState, effect) = try {
