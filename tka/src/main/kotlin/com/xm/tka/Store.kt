@@ -48,6 +48,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     internal val effectDisposables: MutableMap<Long, Disposable> = mutableMapOf()
     private var id: Long = 0
 
+    @Synchronized
     fun send(action: ACTION) {
         if (!isSending) {
             synchronousActionsToSend.add(action)
