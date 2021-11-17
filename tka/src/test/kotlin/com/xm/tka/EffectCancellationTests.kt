@@ -87,10 +87,11 @@ class EffectCancellationTests {
 
         assertNull(value)
 
-        Schedulers.computation().scheduleDirect({
-            Effects.cancel<Int>(id).subscribe()
-                .also { compositeDisposable.add(it) }
-        }, 5, MILLISECONDS)
+        Schedulers.computation().scheduleDirect(
+            { Effects.cancel<Int>(id).subscribe().also { compositeDisposable.add(it) } },
+            5,
+            MILLISECONDS
+        )
 
         sleep(200)
 

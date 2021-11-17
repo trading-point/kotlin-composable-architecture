@@ -212,7 +212,8 @@ class StoreTest {
                 Tap -> state + merge(
                     just(Next1),
                     just(Next2),
-                    fireAndForget { values.add(1) })
+                    fireAndForget { values.add(1) }
+                )
                 Next1 -> state + merge(
                     just(End),
                     fireAndForget { values.add(2) }

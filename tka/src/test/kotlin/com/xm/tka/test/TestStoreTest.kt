@@ -7,7 +7,6 @@ import com.xm.tka.test.TestStore.Step.Companion.receive
 import com.xm.tka.test.TestStore.Step.Companion.send
 import com.xm.tka.test.TestStoreTest.Action.Change
 import com.xm.tka.test.TestStoreTest.Action.Result
-import java.lang.AssertionError
 import org.junit.Test
 
 private const val INITIAL_STATE = 0
@@ -25,9 +24,11 @@ class TestStoreTest {
     @Test
     fun testSendSuccessful() {
 
-        val store = TestStore(INITIAL_STATE, Reducer<Int, Action, Unit> { _, _, _ ->
-            CHANGED_STATE + none()
-        }, Unit)
+        val store = TestStore(
+            INITIAL_STATE,
+            Reducer<Int, Action, Unit> { _, _, _ -> CHANGED_STATE + none() },
+            Unit
+        )
 
         store.assert(
             send(Change) {
@@ -39,9 +40,11 @@ class TestStoreTest {
     @Test(expected = AssertionError::class)
     fun testSendFailAsserted() {
 
-        val store = TestStore(INITIAL_STATE, Reducer<Int, Action, Unit> { _, _, _ ->
-            CHANGED_STATE + none()
-        }, Unit)
+        val store = TestStore(
+            INITIAL_STATE,
+            Reducer<Int, Action, Unit> { _, _, _ -> CHANGED_STATE + none() },
+            Unit
+        )
 
         store.assert(
             send(Change) {
@@ -53,12 +56,16 @@ class TestStoreTest {
     @Test
     fun testSendReceiveWithoutUpdateSuccessful() {
 
-        val store = TestStore(Unit, Reducer<Unit, Action, Unit> { state, action, _ ->
-            when (action) {
-                Change -> state + just(Result)
-                else -> state + none()
-            }
-        }, Unit)
+        val store = TestStore(
+            Unit,
+            Reducer<Unit, Action, Unit> { state, action, _ ->
+                when (action) {
+                    Change -> state + just(Result)
+                    else -> state + none()
+                }
+            },
+            Unit
+        )
 
         store.assert(
             send(Change),
@@ -69,12 +76,16 @@ class TestStoreTest {
     @Test
     fun testReceiveSuccessful() {
 
-        val store = TestStore(State(), Reducer<State, Action, Unit> { state, action, _ ->
-            when (action) {
-                Change -> state + just(Result)
-                Result -> state.copy(value = CHANGED_STATE) + none()
-            }
-        }, Unit)
+        val store = TestStore(
+            State(),
+            Reducer<State, Action, Unit> { state, action, _ ->
+                when (action) {
+                    Change -> state + just(Result)
+                    Result -> state.copy(value = CHANGED_STATE) + none()
+                }
+            },
+            Unit
+        )
 
         store.assert(
             send(Change),
@@ -87,12 +98,16 @@ class TestStoreTest {
     @Test(expected = AssertionError::class)
     fun testReceiveStateFailAsserted() {
 
-        val store = TestStore(State(), Reducer<State, Action, Unit> { state, action, _ ->
-            when (action) {
-                Change -> state + just(Result)
-                Result -> state.copy(value = CHANGED_STATE) + none()
-            }
-        }, Unit)
+        val store = TestStore(
+            State(),
+            Reducer<State, Action, Unit> { state, action, _ ->
+                when (action) {
+                    Change -> state + just(Result)
+                    Result -> state.copy(value = CHANGED_STATE) + none()
+                }
+            },
+            Unit
+        )
 
         store.assert(
             send(Change),

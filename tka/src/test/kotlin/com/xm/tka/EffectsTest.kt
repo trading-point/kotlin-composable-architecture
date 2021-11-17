@@ -59,13 +59,15 @@ class EffectsTest {
             subscriber.onNext(1)
             subscriber.onNext(2)
 
-            scheduler.scheduleDirect({
-                subscriber.onNext(3)
-            }, 1, SECONDS)
-            scheduler.scheduleDirect({
-                subscriber.onNext(4)
-                subscriber.onComplete()
-            }, 2, SECONDS)
+            scheduler.scheduleDirect({ subscriber.onNext(3) }, 1, SECONDS)
+            scheduler.scheduleDirect(
+                {
+                    subscriber.onNext(4)
+                    subscriber.onComplete()
+                },
+                2,
+                SECONDS
+            )
         }
             .test()
             .assertNotComplete()
@@ -90,9 +92,7 @@ class EffectsTest {
         val effect = Observable.create<Int> { observer ->
             observer.onNext(1)
 
-            scheduler.scheduleDirect({
-                observer.onNext(2)
-            }, 1, SECONDS)
+            scheduler.scheduleDirect({ observer.onNext(2) }, 1, SECONDS)
         }.cancellable(cancelId)
 
         effect
