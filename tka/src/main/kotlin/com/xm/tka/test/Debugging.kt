@@ -9,7 +9,7 @@ import com.xm.tka.Reducer
  * @param printer: A print function. Defaults to a function that uses `println` function.
  * @return A reducer that prints debug messages for all received actions.
  */
-fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.debug(
+fun <STATE, ACTION : Any, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.debug(
     prefix: String = "",
     printer: Printer = Printer()
 ): Reducer<STATE, ACTION, ENVIRONMENT> = Reducer { state, action, environment ->

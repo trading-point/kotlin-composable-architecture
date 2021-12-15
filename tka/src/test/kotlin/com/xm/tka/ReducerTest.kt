@@ -7,8 +7,8 @@ import com.xm.tka.ReducerTest.Action.Increment
 import com.xm.tka.test.TestStore
 import com.xm.tka.test.TestStore.Step.Companion.`do`
 import com.xm.tka.test.TestStore.Step.Companion.send
-import io.reactivex.Scheduler
-import io.reactivex.schedulers.TestScheduler
+import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.schedulers.TestScheduler
 import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

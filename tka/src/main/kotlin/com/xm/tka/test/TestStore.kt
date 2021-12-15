@@ -7,7 +7,7 @@ import com.xm.tka.Reducer
 import com.xm.tka.test.TestStore.Step.Type.Environment
 import com.xm.tka.test.TestStore.Step.Type.Receive
 import com.xm.tka.test.TestStore.Step.Type.Send
-import io.reactivex.disposables.Disposable
+import io.reactivex.rxjava3.disposables.Disposable
 import java.util.LinkedList
 
 /**
@@ -39,7 +39,7 @@ import java.util.LinkedList
  *
  *   Source: https://github.com/pointfreeco/swift-composable-architecture/blob/main/Sources/ComposableArchitecture/TestSupport/TestStore.swift
  */
-class TestStore<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> private constructor(
+class TestStore<STATE, LOCAL_STATE, ACTION : Any, LOCAL_ACTION : Any, ENVIRONMENT> private constructor(
     initialState: STATE,
     private val reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
     private val environment: ENVIRONMENT,
@@ -251,7 +251,7 @@ State change on step $step: $type does not match expectation
          * @param reducer: A reducer.
          * @param environment: The environment to start the test from.
          */
-        operator fun <STATE, ACTION, ENVIRONMENT> invoke(
+        operator fun <STATE, ACTION : Any, ENVIRONMENT> invoke(
             initialState: STATE,
             reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
             environment: ENVIRONMENT,

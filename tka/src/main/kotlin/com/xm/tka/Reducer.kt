@@ -4,7 +4,7 @@ package com.xm.tka
 
 import com.xm.tka.Effects.none
 import com.xm.tka.Reducer.Companion.combine
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 
 /**
  * A reducer describes how to evolve the current state of an application to the next state, given
@@ -25,7 +25,7 @@ import io.reactivex.Observable
  *
  * Source: https://github.com/pointfreeco/swift-composable-architecture/blob/main/Sources/ComposableArchitecture/Reducer.swift
  */
-interface Reducer<STATE, ACTION, ENVIRONMENT> {
+interface Reducer<STATE, ACTION : Any, ENVIRONMENT> {
 
     fun reduce(state: STATE, action: ACTION, environment: ENVIRONMENT): Reduced<STATE, ACTION>
 
@@ -46,7 +46,7 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
      * @param toLocalAction: An [ActionPrism] that can extract/embed [ACTION] from GLOBAL_ACTION.
      * @param toLocalEnvironment: A [Getter] that transforms [GLOBAL_ENVIRONMENT] into [ENVIRONMENT].
      */
-    fun <GLOBAL_STATE, GLOBAL_ACTION, GLOBAL_ENVIRONMENT> pullback(
+    fun <GLOBAL_STATE, GLOBAL_ACTION : Any, GLOBAL_ENVIRONMENT> pullback(
         toLocalState: StateLens<GLOBAL_STATE, STATE>,
         toLocalAction: ActionPrism<GLOBAL_ACTION, ACTION>,
         toLocalEnvironment: Getter<GLOBAL_ENVIRONMENT, ENVIRONMENT>
@@ -80,7 +80,7 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
          *
          * @param reduce : A function signature that takes state, action and environment.
          */
-        operator fun <STATE, ACTION, ENVIRONMENT> invoke(
+        operator fun <STATE, ACTION : Any, ENVIRONMENT> invoke(
             reduce: Reduce<STATE, ACTION, ENVIRONMENT>
         ): Reducer<STATE, ACTION, ENVIRONMENT> = object : Reducer<STATE, ACTION, ENVIRONMENT> {
 
@@ -96,7 +96,7 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
         /**
          * A reducer that performs no state mutations and returns no effects.
          */
-        fun <STATE, ACTION, ENVIRONMENT> empty(): Reducer<STATE, ACTION, ENVIRONMENT> =
+        fun <STATE, ACTION : Any, ENVIRONMENT> empty(): Reducer<STATE, ACTION, ENVIRONMENT> =
             Reducer { state, _, _ -> state + none() }
 
         /**
@@ -127,7 +127,7 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
          * @param reducers: A list of reducers.
          * @return A single [Reducer].
          */
-        fun <STATE, ACTION, ENVIRONMENT> combine(
+        fun <STATE, ACTION : Any, ENVIRONMENT> combine(
             reducers: List<Reducer<STATE, ACTION, ENVIRONMENT>>
         ): Reducer<STATE, ACTION, ENVIRONMENT> =
             Reducer { state, action, environment ->
@@ -148,7 +148,7 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
          * @param reducers An array of reducers.
          * @return A single [Reducer].
          */
-        fun <STATE, ACTION, ENVIRONMENT> combine(
+        fun <STATE, ACTION : Any, ENVIRONMENT> combine(
             vararg reducers: Reducer<STATE, ACTION, ENVIRONMENT>
         ): Reducer<STATE, ACTION, ENVIRONMENT> = combine(reducers.toList())
     }
@@ -157,7 +157,7 @@ interface Reducer<STATE, ACTION, ENVIRONMENT> {
 /**
  * Helper context to attach extensions to generic types to be used with the reduce function
  */
-interface ReduceContext<STATE, ACTION, ENVIRONMENT> {
+interface ReduceContext<STATE, ACTION : Any, ENVIRONMENT> {
 
     /**
      * Combines a state and an effect into a [Reduced] result
@@ -168,7 +168,7 @@ interface ReduceContext<STATE, ACTION, ENVIRONMENT> {
     /**
      * Merges effects into a new one
      */
-    operator fun <ACTION> Effect<ACTION>.plus(effect: Effect<ACTION>): Effect<ACTION> =
+    operator fun <ACTION : Any> Effect<ACTION>.plus(effect: Effect<ACTION>): Effect<ACTION> =
         Observable.merge(this, effect)
 
     companion object {
@@ -176,7 +176,7 @@ interface ReduceContext<STATE, ACTION, ENVIRONMENT> {
         /**
          * [ReduceContext] constructor
          */
-        operator fun <STATE, ACTION, ENVIRONMENT> invoke(): ReduceContext<STATE, ACTION, ENVIRONMENT> =
+        operator fun <STATE, ACTION : Any, ENVIRONMENT> invoke(): ReduceContext<STATE, ACTION, ENVIRONMENT> =
             object : ReduceContext<STATE, ACTION, ENVIRONMENT> {}
     }
 }
@@ -201,7 +201,7 @@ typealias Reduced<STATE, ACTION> = Pair<STATE, Effect<ACTION>>
  * @param reducer Another reducer
  * @return A single [Reducer].
  */
-fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.combinedWith(
+fun <STATE, ACTION : Any, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.combinedWith(
     reducer: Reducer<STATE, ACTION, ENVIRONMENT>
 ): Reducer<STATE, ACTION, ENVIRONMENT> = combine(this, reducer)
 
@@ -209,7 +209,7 @@ fun <STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.combinedWit
  * Transforms a reducer that works on non-optional state into one that works on optional state
  * by only running the non-optional reducer when state is non-null.
  */
-inline fun <reified STATE, ACTION, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.optional():
+inline fun <reified STATE, ACTION : Any, ENVIRONMENT> Reducer<STATE, ACTION, ENVIRONMENT>.optional():
     Reducer<STATE?, ACTION, ENVIRONMENT> = Reducer { state, action, environment ->
     state
         .also {

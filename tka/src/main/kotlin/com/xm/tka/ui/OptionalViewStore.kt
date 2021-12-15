@@ -2,10 +2,10 @@
 
 package com.xm.tka.ui
 
-import com.xm.tka.Optional
-import com.xm.tka.Optional.Companion.toOptional
 import com.xm.tka.Store
-import io.reactivex.Observable
+import com.xm.tka.toOptional
+import io.reactivex.rxjava3.core.Observable
+import java.util.Optional
 
 /**
  * A `ViewStore` is an object that can observe state changes and send actions. They are most
@@ -25,8 +25,7 @@ class OptionalViewStore<STATE : Any, ACTION : Any>(
     var currentState: Optional<STATE> = store.currentState
 
     val states: Observable<STATE> = store.state
-        .filter { it.isPresent }
-        .map { it.orNull()!! }
+        .mapOptional { it }
         .distinctUntilChanged(removeDuplicates)
 
     /**

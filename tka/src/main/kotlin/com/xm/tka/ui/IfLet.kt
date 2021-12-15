@@ -1,10 +1,10 @@
 package com.xm.tka.ui
 
-import com.xm.tka.Optional
 import com.xm.tka.Store
-import io.reactivex.annotations.CheckReturnValue
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
+import io.reactivex.rxjava3.annotations.CheckReturnValue
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
+import java.util.Optional
 
 /**
  * Subscribes to updates when a store containing optional state goes from `null` to non-`null` or
@@ -34,8 +34,7 @@ fun <STATE : Any, ACTION : Any> Store<Optional<STATE>, ACTION>.ifLet(
 
     val unwrapDisposable = scopes { states ->
         states.distinctUntilChanged { s1, s2 -> (s1.isPresent) == (s2.isPresent) }
-            .filter { it.isPresent }
-            .map { it.orNull()!! }
+            .mapOptional { it }
     }.subscribe {
         unwrap(it)
     }
