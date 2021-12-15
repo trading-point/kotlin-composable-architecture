@@ -5,15 +5,14 @@ package com.xm.tka
 import com.xm.tka.Effects.cancel
 import com.xm.tka.Effects.just
 import com.xm.tka.Effects.none
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Maybe
-import io.reactivex.Observable
-import io.reactivex.Observable.concat
-import io.reactivex.Single
-import io.reactivex.disposables.Disposable
-import io.reactivex.disposables.Disposables
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Observable.concat
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
 
@@ -43,21 +42,21 @@ object Effects {
      * An effect that does nothing and completes immediately. Useful for situations where you must
      * return an effect, but you don't need to do anything.
      */
-    fun <ACTION> none(): Effect<ACTION> = Observable.empty()
+    fun <ACTION : Any> none(): Effect<ACTION> = Observable.empty()
 
     /**
      * Initializes an effect that immediately emits the value passed in.
      *
      * @param action: The action that is immediately emitted by the effect.
      */
-    fun <ACTION> just(action: ACTION): Effect<ACTION> = Observable.just(action)
+    fun <ACTION : Any> just(action: ACTION): Effect<ACTION> = Observable.just(action)
 
     /**
      * Initializes an effect that immediately fails with the error passed in.
      *
      * @param throwable: The error that is immediately emitted by the effect.
      */
-    fun <ACTION> error(throwable: Throwable): Effect<ACTION> = Observable.error(throwable)
+    fun <ACTION : Any> error(throwable: Throwable): Effect<ACTION> = Observable.error(throwable)
 
     /**
      * Creates an effect that can supply a single value asynchronously in the future.
@@ -65,7 +64,7 @@ object Effects {
      * This can be helpful for converting APIs that are callback-based into ones that deal with
      * `Effect`s.
      */
-    fun <ACTION> future(work: () -> ACTION): Effect<ACTION> = Maybe.fromCallable(work).toEffect()
+    fun <ACTION : Any> future(work: () -> ACTION): Effect<ACTION> = Maybe.fromCallable(work).toEffect()
 
     /**
      * Creates an effect that executes some work in the real world that doesn't need to feed data
@@ -73,7 +72,7 @@ object Effects {
      *
      * @param work: closure encapsulating some work to execute in the real world.
      */
-    fun <ACTION> fireAndForget(work: () -> Unit): Effect<ACTION> =
+    fun <ACTION : Any> fireAndForget(work: () -> Unit): Effect<ACTION> =
         Maybe.fromAction<ACTION> { runCatching(work) }.toEffect()
 
     /**
@@ -83,7 +82,7 @@ object Effects {
      * @param effects: A list of effects.
      * @return A new effect
      */
-    fun <ACTION> merge(vararg effects: Effect<ACTION>): Effect<ACTION> =
+    fun <ACTION : Any> merge(vararg effects: Effect<ACTION>): Effect<ACTION> =
         Observable.merge(effects.toList())
 
     /**
@@ -93,7 +92,7 @@ object Effects {
      * @return A new effect that will cancel any currently in-flight effect with the given
      * identifier.
      */
-    fun <ACTION> cancel(id: Any): Effect<ACTION> = fireAndForget {
+    fun <ACTION : Any> cancel(id: Any): Effect<ACTION> = fireAndForget {
         cancellationDisposables[id]?.forEach { it.dispose() }
     }
 }
@@ -101,27 +100,27 @@ object Effects {
 /**
  * Turns any [Flowable] into an `Effect`
  */
-fun <ACTION> Flowable<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
+fun <ACTION : Any> Flowable<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
 
 /**
  * Turns any [Single] into an `Effect`
  */
-fun <ACTION> Single<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
+fun <ACTION : Any> Single<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
 
 /**
  * Turns any [Maybe] into an `Effect`
  */
-fun <ACTION> Maybe<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
+fun <ACTION : Any> Maybe<ACTION>.toEffect(): Effect<ACTION> = this.toObservable()
 
 /**
  * Turns any [Completable] into a [none] `Effect`
  */
-fun <ACTION> Completable.toEffect(): Effect<ACTION> = this.andThen(none())
+fun <ACTION : Any> Completable.toEffect(): Effect<ACTION> = this.andThen(none())
 
 /**
  * Turns any [Completable] into a [just] `Effect`
  */
-fun <ACTION> Completable.toEffect(action: ACTION): Effect<ACTION> = this.andThen(just(action))
+fun <ACTION : Any> Completable.toEffect(action: ACTION): Effect<ACTION> = this.andThen(just(action))
 
 /**
  * Turns an effect into one that is capable of being canceled.
@@ -145,7 +144,7 @@ fun <ACTION : Any> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean =
             .subscribe(subject::onNext, subject::onError, subject::onComplete)
 
         var cancellationDisposable: Disposable? = null
-        cancellationDisposable = Disposables.fromAction {
+        cancellationDisposable = Disposable.fromAction {
             subject.onComplete()
             disposable.dispose()
             cancellationDisposables[id]

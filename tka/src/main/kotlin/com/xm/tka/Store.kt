@@ -3,11 +3,11 @@
 package com.xm.tka
 
 import com.xm.tka.Effects.none
-import com.xm.tka.Optional.Companion.toOptional
 import com.xm.tka.test.Printer
-import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.BehaviorSubject
+import java.util.Optional
 import java.util.concurrent.LinkedBlockingDeque
 
 /**
@@ -31,7 +31,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
             parentStream
                 // don't delegate onError events
                 .doOnError { printer.print("TKA: Store: parentStream", it) }
-                .onErrorResumeNext(Observable.never())
+                .onErrorResumeWith(Observable.never())
                 // don't delegate onComplete events
                 .concatWith(Observable.never())
                 // forward events to subject
@@ -155,7 +155,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     ): Observable<Store<LOCAL_STATE, LOCAL_ACTION>> {
 
         val extractLocalState: (STATE) -> LOCAL_STATE? = {
-            toLocalState(Observable.just(it)).blockingFirst(null)
+            toLocalState(Observable.just(it)).runCatching { blockingFirst() }.getOrNull()
         }
 
         return toLocalState(_state)
@@ -171,9 +171,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                             none()
                         )
                     },
-                    parentStream = _state.map { extractLocalState(it).toOptional() }
-                        .filter { it.isPresent }
-                        .map { it.orNull()!! },
+                    parentStream = _state.mapOptional { extractLocalState(it).toOptional() },
                     printer = printer
                 )
             }

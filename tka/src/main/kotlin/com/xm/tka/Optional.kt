@@ -2,34 +2,8 @@
 
 package com.xm.tka
 
-/**
- * An Optional wrapper for a state
- */
-class Optional<out STATE : Any> private constructor(
-    private val state: STATE?
-) {
+import java.util.Optional
 
-    val isPresent = state != null
+fun <STATE : Any> STATE?.toOptional(): Optional<STATE> = Optional.ofNullable(this)
 
-    fun orNull(): STATE? = state
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Optional<*>
-
-        if (state != other.state) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return state?.hashCode() ?: 0
-    }
-
-    companion object {
-
-        fun <STATE : Any> STATE?.toOptional(): Optional<STATE> = Optional(this)
-    }
-}
+fun <T : Any?> Optional<T>.orNull(): T? = this.orElse(null)

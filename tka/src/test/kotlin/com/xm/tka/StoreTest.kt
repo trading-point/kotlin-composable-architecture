@@ -4,7 +4,6 @@ import com.xm.tka.Effects.fireAndForget
 import com.xm.tka.Effects.just
 import com.xm.tka.Effects.merge
 import com.xm.tka.Effects.none
-import com.xm.tka.Optional.Companion.toOptional
 import com.xm.tka.StoreTest.Action2.End
 import com.xm.tka.StoreTest.Action2.Next1
 import com.xm.tka.StoreTest.Action2.Next2
@@ -14,7 +13,7 @@ import com.xm.tka.StoreTest.Action3.Noop
 import com.xm.tka.ui.OptionalViewStore.Companion.optionalView
 import com.xm.tka.ui.ViewStore.Companion.view
 import com.xm.tka.ui.ifLet
-import io.reactivex.schedulers.TestScheduler
+import io.reactivex.rxjava3.schedulers.TestScheduler
 import java.util.concurrent.TimeUnit.SECONDS
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
