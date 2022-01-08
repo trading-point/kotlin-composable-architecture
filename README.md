@@ -5,6 +5,7 @@
 [Point-Free's](https://github.com/pointfreeco) [The Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture) is a Swift library so this "fork" has ported the core concepts in Kotlin in order to help share domain logic amongst Android/iOS apps.
 
 ## Design decisions
+
 - As with every Kotlin library that respect itself, the name needs to be paraphrased using the **K** and thus, **The Komposable Architecture** (aka **TKA**) was born.
 - Why RxJava? Because the nature of our project dictated the use of a reactive framework and at the time of adoption (2020) it was the only stable and production ready one for Android.
 - The `tka` module is a pure Kotlin library module with no platform dependencies so that it can be used on any java/kotlin project.
@@ -18,11 +19,13 @@
   stream is exposed whose lifecycle need to be handled on call-site. 
 
 ## TODO
+
 - Migrate Debugging tools
 - Migrate more Examples 😅
 - Migrate `forEach` reducers
 
 ## Future work
+
 - Add coroutines support
 - Add Arrow supplementary package to utilize the power of Arrow Optics and Arrow Meta
 - Add supplementary modules for bridging with Android Jetpack
@@ -191,13 +194,14 @@ class AppView(
     viewStoreDisposable = viewStore.states
       .subscribe { appState ->
         textView.text = "${appState.count}"
-
-        appState.numberFactAlert
-          ?.also {
-            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-
-            viewStore.send(AppAction.FactAlertDismissed)
-          }
+        
+        appState.numberFactAlert?.run { 
+          AlertDialog.Builder(requireActivity())
+            .setMessage(this)
+            .setOnDismissListener { viewStore.send(AppAction.FactAlertDismissed) }
+            .create()
+            .show()
+        }
       }
 
     decrButton.setOnClickListener { viewStore.send(AppAction.DecrementButtonTapped) }
