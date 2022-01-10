@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.xm.examples.databinding.ActivityMainBinding
+import com.xm.examples.fragments.CancellationFragment
 import com.xm.examples.fragments.CounterFragment
 import com.xm.examples.fragments.EffectsBasicFragment
 import com.xm.examples.fragments.TwoCountersFragment
@@ -45,6 +46,13 @@ class MainActivity : AppCompatActivity(), Callback {
     override fun onEffectsBasicClicked() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, EffectsBasicFragment(), null)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onCancellationClicked() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, CancellationFragment(), null)
             .addToBackStack(null)
             .commit()
     }

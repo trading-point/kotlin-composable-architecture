@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.xm.examples.databinding.FragmentMainBinding
-import com.xm.examples.fragments.CounterFragment
 
 class MainFragment : Fragment() {
 
@@ -29,16 +28,18 @@ class MainFragment : Fragment() {
 
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
-        binding.btnBasics.setOnClickListener { callback.onBasicClicked() }
-        binding.btnPullback.setOnClickListener { callback.onTwoCountersClicked() }
-        binding.btnEffects.setOnClickListener { callback.onEffectsBasicClicked() }
+        with(binding) {
+            btnBasics.setOnClickListener { callback.onBasicClicked() }
+            btnPullback.setOnClickListener { callback.onTwoCountersClicked() }
+            btnEffects.setOnClickListener { callback.onEffectsBasicClicked() }
+            btnCancellation.setOnClickListener { callback.onCancellationClicked() }
+        }
     }
 
     fun setupCallback(callback: MainActivity) {
         this.callback = callback
     }
 }
-
 
 interface Callback {
 
@@ -48,4 +49,5 @@ interface Callback {
 
     fun onEffectsBasicClicked()
 
+    fun onCancellationClicked()
 }
