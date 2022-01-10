@@ -1,6 +1,7 @@
 package com.xm.examples
 
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.xm.examples.databinding.ActivityMainBinding
 import com.xm.examples.fragments.CounterFragment
@@ -18,18 +19,24 @@ class MainActivity : AppCompatActivity(), Callback {
 
         mainFragment = MainFragment()
         supportFragmentManager.beginTransaction()
-            .add(R.id.container, mainFragment, null)
+            .add(R.id.main_container, mainFragment, null)
             .addToBackStack(null)
             .commit()
 
         mainFragment.setupCallback(this)
-
     }
 
     override fun onBasicClicked() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.container, CounterFragment(), null)
+            .replace(R.id.main_container, CounterFragment(), null)
             .addToBackStack(null)
             .commit()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> onBackPressed()
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
