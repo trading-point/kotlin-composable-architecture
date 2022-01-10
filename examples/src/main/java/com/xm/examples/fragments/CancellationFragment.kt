@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.xm.examples.MainActivity
 import com.xm.examples.databinding.FragmentCancellationBinding
-import com.xm.examples.fragments.EffectsCancellationAction.stepperChanged
+import com.xm.examples.fragments.EffectsCancellationAction.cancelButtonTapped
+import com.xm.examples.fragments.EffectsCancellationAction.stepperDecrement
+import com.xm.examples.fragments.EffectsCancellationAction.stepperIncrement
 import com.xm.examples.fragments.EffectsCancellationAction.triviaButtonTapped
 import com.xm.examples.fragments.EffectsCancellationAction.triviaResponse
 import com.xm.examples.utils.FactClientLive
@@ -36,7 +38,7 @@ class CancellationFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentCancellationBinding.inflate(layoutInflater)
 
         return binding.root
@@ -68,26 +70,32 @@ class CancellationFragment : Fragment() {
 
         with(binding) {
             btnDecrement.setOnClickListener {
-                viewStore.send(stepperChanged(tvNumber.text.toString().toInt()))
+                viewStore.send(stepperDecrement(tvNumber.text.toString().toInt()))
             }
             btnIncrement.setOnClickListener {
-                viewStore.send(stepperChanged(tvNumber.text.toString().toInt()))
+                viewStore.send(stepperIncrement(tvNumber.text.toString().toInt()))
             }
             btnNumberFact.setOnClickListener { viewStore.send(triviaButtonTapped) }
-            btnCancel.setOnClickListener { viewStore.send(EffectsCancellationAction.cancelButtonTapped) }
+            btnCancel.setOnClickListener { viewStore.send(cancelButtonTapped) }
         }
     }
 
     private val effectsCancellationReducer =
         Reducer<EffectCancellationState, EffectsCancellationAction, EffectsCancellationEnvironment> { state, action, env ->
             when (action) {
-                is stepperChanged -> state.copy(
+                is stepperDecrement -> state.copy(
+                    count = action.num - 1,
+                    currentTrivia = null,
+                    isTriviaRequestInFlight = false
+                ) + Effects.none()
+
+                is stepperIncrement -> state.copy(
                     count = action.num + 1,
                     currentTrivia = null,
                     isTriviaRequestInFlight = false
                 ) + Effects.none()
 
-                EffectsCancellationAction.cancelButtonTapped -> state.copy(
+                cancelButtonTapped -> state.copy(
                     isTriviaRequestInFlight = false
                 ) + Effects.cancel(TriviaRequestId)
 
