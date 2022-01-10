@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.xm.examples.MainActivity
 import com.xm.examples.databinding.FragmentCounterBinding
 import com.xm.examples.fragments.CounterAction.decrementButtonTapped
 import com.xm.examples.fragments.CounterAction.incrementButtonTapped
@@ -32,6 +33,8 @@ class CounterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val store = Store(
             initialState = CounterState(),
