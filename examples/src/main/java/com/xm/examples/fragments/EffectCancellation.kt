@@ -12,7 +12,8 @@ data class EffectCancellationState(
 
 sealed class EffectsCancellationAction {
     object cancelButtonTapped : EffectsCancellationAction()
-    data class stepperChanged(val num: Int) : EffectsCancellationAction()
+    data class stepperDecrement(val num: Int) : EffectsCancellationAction()
+    data class stepperIncrement(val num: Int) : EffectsCancellationAction()
     object triviaButtonTapped : EffectsCancellationAction()
     data class triviaResponse(val response: Result<String>) : EffectsCancellationAction()
 }
