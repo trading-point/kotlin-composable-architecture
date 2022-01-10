@@ -23,3 +23,18 @@ val counterReducer = Reducer<CounterState, CounterAction, CounterEnvironment> { 
         incrementButtonTapped -> state.copy(count = state.count + 1) + Effects.none()
     }
 }
+
+/**
+ * TwoCounters
+ */
+data class TwoCounterState(
+    val firstCounter: CounterState = CounterState(),
+    val secondCounter: CounterState = CounterState()
+)
+
+sealed class TwoCounterAction {
+    data class PullbackFirstCounter(val action: CounterAction) : TwoCounterAction()
+    data class PullbackSecondCounter(val action: CounterAction) : TwoCounterAction()
+}
+
+object TwoCounterEnvironment

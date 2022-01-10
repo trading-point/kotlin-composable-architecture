@@ -30,6 +30,7 @@ class MainFragment : Fragment() {
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
         binding.btnBasics.setOnClickListener { callback.onBasicClicked() }
+        binding.btnPullback.setOnClickListener { callback.onTwoCountersClicked() }
     }
 
     fun setupCallback(callback: MainActivity) {
@@ -41,5 +42,7 @@ class MainFragment : Fragment() {
 interface Callback {
 
     fun onBasicClicked()
+
+    fun onTwoCountersClicked()
 
 }

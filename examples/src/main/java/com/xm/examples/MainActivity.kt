@@ -5,6 +5,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.xm.examples.databinding.ActivityMainBinding
 import com.xm.examples.fragments.CounterFragment
+import com.xm.examples.fragments.TwoCountersFragment
 
 class MainActivity : AppCompatActivity(), Callback {
 
@@ -29,6 +30,13 @@ class MainActivity : AppCompatActivity(), Callback {
     override fun onBasicClicked() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, CounterFragment(), null)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onTwoCountersClicked() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, TwoCountersFragment(), null)
             .addToBackStack(null)
             .commit()
     }
