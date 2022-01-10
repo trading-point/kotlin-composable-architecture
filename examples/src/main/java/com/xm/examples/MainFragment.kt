@@ -31,6 +31,7 @@ class MainFragment : Fragment() {
 
         binding.btnBasics.setOnClickListener { callback.onBasicClicked() }
         binding.btnPullback.setOnClickListener { callback.onTwoCountersClicked() }
+        binding.btnEffects.setOnClickListener { callback.onEffectsBasicClicked() }
     }
 
     fun setupCallback(callback: MainActivity) {
@@ -44,5 +45,7 @@ interface Callback {
     fun onBasicClicked()
 
     fun onTwoCountersClicked()
+
+    fun onEffectsBasicClicked()
 
 }
