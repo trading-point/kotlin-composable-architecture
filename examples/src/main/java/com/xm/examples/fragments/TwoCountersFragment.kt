@@ -59,10 +59,10 @@ class TwoCountersFragment : Fragment() {
 
         with(binding) {
             btnFirstDecrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackFirstCounter(CounterAction.decrementButtonTapped))
+                viewStore.send(TwoCounterAction.PullbackFirstCounter(CounterAction.DecrementButtonTapped))
             }
             btnFirstIncrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackFirstCounter(CounterAction.incrementButtonTapped))
+                viewStore.send(TwoCounterAction.PullbackFirstCounter(CounterAction.IncrementButtonTapped))
             }
         }
     }
@@ -76,10 +76,10 @@ class TwoCountersFragment : Fragment() {
 
         with(binding) {
             btnSecondDecrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackSecondCounter(CounterAction.decrementButtonTapped))
+                viewStore.send(TwoCounterAction.PullbackSecondCounter(CounterAction.DecrementButtonTapped))
             }
             btnSecondIncrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackSecondCounter(CounterAction.incrementButtonTapped))
+                viewStore.send(TwoCounterAction.PullbackSecondCounter(CounterAction.IncrementButtonTapped))
             }
         }
     }
