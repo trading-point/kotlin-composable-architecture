@@ -2,7 +2,6 @@ package com.xm.examples.fragments
 
 import androidx.lifecycle.ViewModel
 import com.xm.examples.utils.FactClientLive
-import com.xm.examples.utils.Result
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
@@ -89,15 +88,19 @@ private val effectsCancellationReducer =
                 .cast()
 
             is EffectsCancellationAction.TriviaResponse ->
-                when (action.response) {
-                    is Result.Success -> state.copy(
-                        currentTrivia = action.response.data,
-                        isTriviaRequestInFlight = false
-                    ) + Effects.none()
-                    is Result.Error -> state.copy(
-                        isTriviaRequestInFlight = false
-                    ) + Effects.none()
-                }
+                action.response.fold(
+                    onSuccess = { data ->
+                        state.copy(
+                            currentTrivia = data,
+                            isTriviaRequestInFlight = false
+                        ) + Effects.none()
+                    },
+                    onFailure = {
+                        state.copy(
+                            isTriviaRequestInFlight = false
+                        ) + Effects.none()
+                    }
+                )
         }
     }
 
