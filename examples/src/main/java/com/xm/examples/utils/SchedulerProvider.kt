@@ -9,25 +9,11 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 /**
  * Provides different types of schedulers.
  */
-class SchedulerProvider private constructor(/* Prevent direct instantiation. */) {
+object SchedulerProvider {
 
     @NonNull
     fun io(): Scheduler = Schedulers.io()
 
     @NonNull
     fun mainThread(): Scheduler = AndroidSchedulers.mainThread()
-
-    companion object {
-        @Nullable
-        private var INSTANCE: SchedulerProvider? = null
-
-        @get:Synchronized
-        val instance: SchedulerProvider
-            get() {
-                if (INSTANCE == null) {
-                    INSTANCE = SchedulerProvider()
-                }
-                return INSTANCE!!
-            }
-    }
 }

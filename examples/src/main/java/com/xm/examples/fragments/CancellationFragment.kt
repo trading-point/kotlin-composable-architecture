@@ -51,7 +51,7 @@ class CancellationFragment : Fragment() {
         val store = Store(
             initialState = EffectCancellationState(),
             reducer = effectsCancellationReducer,
-            environment = EffectsCancellationEnvironment(FactClientLive, SchedulerProvider.instance)
+            environment = EffectsCancellationEnvironment(FactClientLive, SchedulerProvider)
         )
 
         viewStore = store.view()
