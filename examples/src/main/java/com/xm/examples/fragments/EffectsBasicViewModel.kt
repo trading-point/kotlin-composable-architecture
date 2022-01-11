@@ -6,7 +6,6 @@ import com.xm.examples.fragments.EffectsBasicsAction.IncrementButtonTapped
 import com.xm.examples.fragments.EffectsBasicsAction.NumberFactButtonTapped
 import com.xm.examples.fragments.EffectsBasicsAction.NumberFactResponse
 import com.xm.examples.utils.FactClientLive
-import com.xm.examples.utils.Result
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
@@ -88,15 +87,19 @@ private val effectsBasicReducer =
                 .cast()
 
             is NumberFactResponse ->
-                when (action.response) {
-                    is Result.Success -> state.copy(
-                        numberFact = action.response.data,
-                        isNumberFactRequestInFlight = false
-                    ) + Effects.none()
-                    is Result.Error -> state.copy(
-                        numberFact = action.response.exception.toString(),
-                        isNumberFactRequestInFlight = false
-                    ) + Effects.none()
-                }
+                action.response.fold(
+                    onSuccess = { data ->
+                        state.copy(
+                            numberFact = data,
+                            isNumberFactRequestInFlight = false
+                        ) + Effects.none()
+                    },
+                    onFailure = { throwable ->
+                        state.copy(
+                            numberFact = throwable.toString(),
+                            isNumberFactRequestInFlight = false
+                        ) + Effects.none()
+                    }
+                )
         }
     }

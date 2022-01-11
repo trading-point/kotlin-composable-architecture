@@ -12,12 +12,12 @@ object FactClientLive : FactClient {
         Single.fromCallable {
             try {
                 val response = URL("http://numbersapi.com/$number/trivia").readText()
-                Result.Success(response)
+                Result.success(response)
             } catch (e: Exception) {
                 Log.i("Exception", "execute: $e ")
                 // Sometimes numbersapi.com can be flakey, so if it ever fails we will just
                 // default to a mock response.
-                Result.Success("$number is a good number Brent")
+                Result.success("$number is a good number Brent")
             }
         }
 }
