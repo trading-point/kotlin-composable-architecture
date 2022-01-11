@@ -1,10 +1,12 @@
 package com.xm.examples.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.xm.examples.MainActivity
 import com.xm.examples.databinding.FragmentTwoCountersBinding
 import com.xm.tka.ActionPrism
@@ -22,7 +24,13 @@ class TwoCountersFragment : Fragment() {
 
     private var compositeDisposable = CompositeDisposable()
 
+    private val viewModel: TwoCountersViewModel by viewModels()
     private lateinit var viewStore: ViewStore<TwoCounterState, TwoCounterAction>
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        viewStore = viewModel.viewStore
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,19 +46,7 @@ class TwoCountersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val store = Store(
-            initialState = TwoCounterState(),
-            reducer = twoCountersReducer,
-            environment = Unit
-        )
-
-        viewStore = store.view()
-
-        observeFirstCounter()
-        observeSecondCounter()
-    }
-
-    private fun observeFirstCounter() {
+        // first counter
         viewStore.states
             .subscribe {
                 binding.tvFirstNumber.text = it.firstCounter.count.toString()
@@ -59,15 +55,14 @@ class TwoCountersFragment : Fragment() {
 
         with(binding) {
             btnFirstDecrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackFirstCounter(CounterAction.DecrementButtonTapped))
+                viewStore.send(TwoCounterAction.Counter1(CounterAction.DecrementButtonTapped))
             }
             btnFirstIncrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackFirstCounter(CounterAction.IncrementButtonTapped))
+                viewStore.send(TwoCounterAction.Counter1(CounterAction.IncrementButtonTapped))
             }
         }
-    }
 
-    private fun observeSecondCounter() {
+        // second counter
         viewStore.states
             .subscribe {
                 binding.tvSecondNumber.text = it.secondCounter.count.toString()
@@ -76,12 +71,13 @@ class TwoCountersFragment : Fragment() {
 
         with(binding) {
             btnSecondDecrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackSecondCounter(CounterAction.DecrementButtonTapped))
+                viewStore.send(TwoCounterAction.Counter2(CounterAction.DecrementButtonTapped))
             }
             btnSecondIncrement.setOnClickListener {
-                viewStore.send(TwoCounterAction.PullbackSecondCounter(CounterAction.IncrementButtonTapped))
+                viewStore.send(TwoCounterAction.Counter2(CounterAction.IncrementButtonTapped))
             }
         }
+
     }
 
     override fun onDestroyView() {
@@ -89,29 +85,4 @@ class TwoCountersFragment : Fragment() {
         super.onDestroyView()
     }
 
-    private val twoCountersReducer: Reducer<TwoCounterState, TwoCounterAction, Unit> =
-        Reducer.combine(
-            counterReducer.pullback(
-                toLocalState = StateLens(
-                    get = { it.firstCounter },
-                    set = { state, update -> state.copy(firstCounter = update) }
-                ),
-                toLocalAction = ActionPrism(
-                    get = { (it as? TwoCounterAction.PullbackFirstCounter)?.action },
-                    reverseGet = { TwoCounterAction.PullbackFirstCounter(it) }
-                ),
-                toLocalEnvironment = { CounterEnvironment }
-            ),
-            counterReducer.pullback(
-                toLocalState = StateLens(
-                    get = { it.secondCounter },
-                    set = { state, update -> state.copy(secondCounter = update) }
-                ),
-                toLocalAction = ActionPrism(
-                    get = { (it as? TwoCounterAction.PullbackSecondCounter)?.action },
-                    reverseGet = { TwoCounterAction.PullbackSecondCounter(it) }
-                ),
-                toLocalEnvironment = { CounterEnvironment }
-            )
-        )
 }
