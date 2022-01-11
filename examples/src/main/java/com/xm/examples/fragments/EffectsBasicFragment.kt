@@ -50,7 +50,7 @@ class EffectsBasicFragment : Fragment() {
         val store = Store(
             initialState = EffectsBasicsState(),
             reducer = effectsBasicReducer,
-            environment = EffectsBasicsEnvironment(FactClientLive, SchedulerProvider.instance)
+            environment = EffectsBasicsEnvironment(FactClientLive, SchedulerProvider)
         )
 
         viewStore = store.view()
