@@ -21,12 +21,21 @@ class MainActivity : AppCompatActivity(), Callback {
         setContentView(binding.root)
 
         mainFragment = MainFragment()
-        supportFragmentManager.beginTransaction()
-            .add(R.id.main_container, mainFragment, null)
-            .addToBackStack(null)
-            .commit()
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.main_container, mainFragment, null)
+                .addToBackStack(null)
+                .commit()
+        }
 
         mainFragment.setupCallback(this)
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            finish()
+        }
     }
 
     override fun onBasicClicked() {

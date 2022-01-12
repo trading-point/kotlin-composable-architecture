@@ -18,6 +18,8 @@ class TwoCountersViewModel : ViewModel() {
 
     val viewStore: ViewStore<TwoCounterState, TwoCounterAction> = store.view()
 
+    val scopeCounter1: Store<CounterState, CounterAction> = store.scopeCounter1()
+    val scopeCounter2: Store<CounterState, CounterAction> = store.scopeCounter2()
 }
 
 // Domain
@@ -58,4 +60,16 @@ private val twoCountersReducer: Reducer<TwoCounterState, TwoCounterAction, TwoCo
             ),
             toLocalEnvironment = { CounterEnvironment }
         )
+    )
+
+internal fun Store<TwoCounterState, TwoCounterAction>.scopeCounter1(): Store<CounterState, CounterAction> =
+    this.scope(
+        toLocalState = { it.firstCounter },
+        fromLocalAction = { TwoCounterAction.Counter1(it) }
+    )
+
+internal fun Store<TwoCounterState, TwoCounterAction>.scopeCounter2(): Store<CounterState, CounterAction> =
+    this.scope(
+        toLocalState = { it.secondCounter },
+        fromLocalAction = { TwoCounterAction.Counter2(it) }
     )
