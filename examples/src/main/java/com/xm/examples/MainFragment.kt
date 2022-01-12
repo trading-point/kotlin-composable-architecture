@@ -1,5 +1,6 @@
 package com.xm.examples
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,11 @@ class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
 
     lateinit var callback: Callback
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        setupCallback(context as MainActivity)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

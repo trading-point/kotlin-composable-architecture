@@ -1,6 +1,11 @@
 package com.xm.examples.fragments
 
 import androidx.lifecycle.ViewModel
+import com.xm.examples.fragments.EffectsCancellationAction.CancelButtonTapped
+import com.xm.examples.fragments.EffectsCancellationAction.StepperDecrement
+import com.xm.examples.fragments.EffectsCancellationAction.StepperIncrement
+import com.xm.examples.fragments.EffectsCancellationAction.TriviaButtonTapped
+import com.xm.examples.fragments.EffectsCancellationAction.TriviaResponse
 import com.xm.examples.utils.FactClientLive
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
@@ -60,34 +65,34 @@ object TriviaRequestId
 private val effectsCancellationReducer =
     Reducer<EffectCancellationState, EffectsCancellationAction, EffectsCancellationEnvironment> { state, action, env ->
         when (action) {
-            is EffectsCancellationAction.StepperDecrement -> state.copy(
+            is StepperDecrement -> state.copy(
                 count = action.num - 1,
                 currentTrivia = null,
                 isTriviaRequestInFlight = false
             ) + Effects.none()
 
-            is EffectsCancellationAction.StepperIncrement -> state.copy(
+            is StepperIncrement -> state.copy(
                 count = action.num + 1,
                 currentTrivia = null,
                 isTriviaRequestInFlight = false
             ) + Effects.none()
 
-            EffectsCancellationAction.CancelButtonTapped -> state.copy(
+            CancelButtonTapped -> state.copy(
                 isTriviaRequestInFlight = false
             ) + Effects.cancel(TriviaRequestId)
 
-            EffectsCancellationAction.TriviaButtonTapped -> state.copy(
+            TriviaButtonTapped -> state.copy(
                 currentTrivia = null,
                 isTriviaRequestInFlight = true
             ) + env.fact.execute(state.count.toString())
                 .subscribeOn(env.schedulerProvider.io())
                 .observeOn(env.schedulerProvider.mainThread())
-                .map { EffectsCancellationAction.TriviaResponse(it) }
+                .map { TriviaResponse(it) }
                 .toEffect()
                 .cancellable(TriviaRequestId)
                 .cast()
 
-            is EffectsCancellationAction.TriviaResponse ->
+            is TriviaResponse ->
                 action.response.fold(
                     onSuccess = { data ->
                         state.copy(
