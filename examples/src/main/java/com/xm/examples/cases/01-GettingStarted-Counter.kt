@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
-import com.xm.examples.databinding.FragmentCounterBinding
 import com.xm.examples.cases.CounterAction.DecrementButtonTapped
 import com.xm.examples.cases.CounterAction.IncrementButtonTapped
+import com.xm.examples.databinding.FragmentCounterBinding
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
 import com.xm.tka.Store
@@ -19,6 +19,13 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+
+private val readMe = """
+  This screen demonstrates the basics of the Composable Architecture in an archetypal counter application.
+  
+  The domain of the application is modeled using simple data types that correspond to the mutable
+  state of the application and any actions that can affect that state or the outside world.
+""".trimIndent()
 
 class CounterFragment : Fragment() {
 
@@ -40,7 +47,7 @@ class CounterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCounterBinding.inflate(layoutInflater)
-
+        binding.tvReadme.text = readMe
         return binding.root
     }
 

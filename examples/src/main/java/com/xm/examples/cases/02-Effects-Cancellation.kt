@@ -9,12 +9,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
-import com.xm.examples.databinding.FragmentCancellationBinding
 import com.xm.examples.cases.EffectsCancellationAction.CancelButtonTapped
 import com.xm.examples.cases.EffectsCancellationAction.StepperDecrement
 import com.xm.examples.cases.EffectsCancellationAction.StepperIncrement
 import com.xm.examples.cases.EffectsCancellationAction.TriviaButtonTapped
 import com.xm.examples.cases.EffectsCancellationAction.TriviaResponse
+import com.xm.examples.databinding.FragmentCancellationBinding
 import com.xm.examples.utils.FactClientLive
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
@@ -26,6 +26,18 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+
+private val readMe = """
+  This screen demonstrates how one can cancel in-flight effects in the Composable Architecture.
+  
+  Use the stepper to count to a number, and then tap the "Number fact" button to fetch
+  a random fact about that number using an API.
+  
+  While the API request is in-flight, you can tap "Cancel" to cancel the effect and prevent
+  it from feeding data back into the application. Interacting with the stepper while a
+  request is in-flight will also cancel it.
+    
+""".trimIndent()
 
 class EffectsCancellationFragment : Fragment() {
 
@@ -47,7 +59,7 @@ class EffectsCancellationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCancellationBinding.inflate(layoutInflater)
-
+        binding.tvReadme.text = readMe
         return binding.root
     }
 

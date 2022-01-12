@@ -19,6 +19,13 @@ import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 
+private val readMe = """
+  This screen demonstrates how to take small features and compose them into bigger ones using the
+  `pullback` and `combine` operators on reducers, and the `scope` operator on stores.
+  
+  It reuses the domain of the counter screen and embeds it, twice, in a larger domain.
+""".trimIndent()
+
 class TwoCountersFragment : Fragment() {
 
     private lateinit var binding: FragmentTwoCountersBinding
@@ -39,7 +46,7 @@ class TwoCountersFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentTwoCountersBinding.inflate(layoutInflater)
-
+        binding.tvReadme.text = readMe
         return binding.root
     }
 
