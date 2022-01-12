@@ -1,4 +1,4 @@
-package com.xm.examples.fragments
+package com.xm.examples.cases
 
 import android.content.Context
 import android.os.Bundle
@@ -10,8 +10,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
 import com.xm.examples.databinding.FragmentCounterBinding
-import com.xm.examples.fragments.CounterAction.DecrementButtonTapped
-import com.xm.examples.fragments.CounterAction.IncrementButtonTapped
+import com.xm.examples.cases.CounterAction.DecrementButtonTapped
+import com.xm.examples.cases.CounterAction.IncrementButtonTapped
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
 import com.xm.tka.Store

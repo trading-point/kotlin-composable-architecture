@@ -1,4 +1,4 @@
-package com.xm.examples.fragments
+package com.xm.examples.cases
 
 import android.os.Bundle
 import android.view.LayoutInflater

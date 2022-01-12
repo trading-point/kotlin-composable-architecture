@@ -1,4 +1,4 @@
-package com.xm.examples.fragments
+package com.xm.examples.cases
 
 import android.content.Context
 import android.os.Bundle
@@ -10,11 +10,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
 import com.xm.examples.databinding.FragmentCancellationBinding
-import com.xm.examples.fragments.EffectsCancellationAction.CancelButtonTapped
-import com.xm.examples.fragments.EffectsCancellationAction.StepperDecrement
-import com.xm.examples.fragments.EffectsCancellationAction.StepperIncrement
-import com.xm.examples.fragments.EffectsCancellationAction.TriviaButtonTapped
-import com.xm.examples.fragments.EffectsCancellationAction.TriviaResponse
+import com.xm.examples.cases.EffectsCancellationAction.CancelButtonTapped
+import com.xm.examples.cases.EffectsCancellationAction.StepperDecrement
+import com.xm.examples.cases.EffectsCancellationAction.StepperIncrement
+import com.xm.examples.cases.EffectsCancellationAction.TriviaButtonTapped
+import com.xm.examples.cases.EffectsCancellationAction.TriviaResponse
 import com.xm.examples.utils.FactClientLive
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
