@@ -82,9 +82,8 @@ private val effectsBasicReducer =
             ) + env.fact.execute(state.count.toString())
                 .subscribeOn(env.schedulerProvider.io())
                 .observeOn(env.schedulerProvider.mainThread())
-                .map { NumberFactResponse(it) }
+                .map<EffectsBasicsAction> { NumberFactResponse(it) }
                 .toEffect()
-                .cast()
 
             is NumberFactResponse ->
                 action.response.fold(

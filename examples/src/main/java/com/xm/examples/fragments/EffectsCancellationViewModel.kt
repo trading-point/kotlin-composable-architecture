@@ -87,10 +87,9 @@ private val effectsCancellationReducer =
             ) + env.fact.execute(state.count.toString())
                 .subscribeOn(env.schedulerProvider.io())
                 .observeOn(env.schedulerProvider.mainThread())
-                .map { TriviaResponse(it) }
+                .map<EffectsCancellationAction> { TriviaResponse(it) }
                 .toEffect()
                 .cancellable(TriviaRequestId)
-                .cast()
 
             is TriviaResponse ->
                 action.response.fold(
