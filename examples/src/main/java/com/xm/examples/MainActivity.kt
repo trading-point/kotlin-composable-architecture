@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.xm.examples.databinding.ActivityMainBinding
-import com.xm.examples.fragments.EffectsCancellationFragment
-import com.xm.examples.fragments.CounterFragment
-import com.xm.examples.fragments.EffectsBasicFragment
-import com.xm.examples.fragments.TwoCountersComposeFragment
-import com.xm.examples.fragments.TwoCountersFragment
+import com.xm.examples.cases.EffectsCancellationFragment
+import com.xm.examples.cases.CounterFragment
+import com.xm.examples.cases.EffectsBasicFragment
+import com.xm.examples.cases.TwoCountersComposeFragment
+import com.xm.examples.cases.TwoCountersFragment
 
 class MainActivity : AppCompatActivity(), Callback {
 

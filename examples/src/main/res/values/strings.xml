@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Examples</string>
+    <string name="app_name">Case Studies</string>
 
     <string name="basics_counter_text">
         This screen demonstrates the basics of the Composable Architecture in an archetypal counter
@@ -7,7 +7,7 @@
         \n\n
   The domain of the application is modeled using simple data types that correspond to the mutable
   state of the application and any actions that can affect that state or the outside world.</string>
-    
+
     <string name="two_counters_text">
          This screen demonstrates how to take small features and compose them into bigger ones using the
   `pullback` and `combine` operators on reducers, and the `scope` operator on stores.

@@ -1,4 +1,4 @@
-package com.xm.examples.fragments
+package com.xm.examples.cases
 
 import android.content.Context
 import android.os.Bundle
@@ -10,10 +10,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
 import com.xm.examples.databinding.FragmentEffectsBasicBinding
-import com.xm.examples.fragments.EffectsBasicsAction.DecrementButtonTapped
-import com.xm.examples.fragments.EffectsBasicsAction.IncrementButtonTapped
-import com.xm.examples.fragments.EffectsBasicsAction.NumberFactButtonTapped
-import com.xm.examples.fragments.EffectsBasicsAction.NumberFactResponse
+import com.xm.examples.cases.EffectsBasicsAction.DecrementButtonTapped
+import com.xm.examples.cases.EffectsBasicsAction.IncrementButtonTapped
+import com.xm.examples.cases.EffectsBasicsAction.NumberFactButtonTapped
+import com.xm.examples.cases.EffectsBasicsAction.NumberFactResponse
 import com.xm.examples.utils.FactClientLive
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
