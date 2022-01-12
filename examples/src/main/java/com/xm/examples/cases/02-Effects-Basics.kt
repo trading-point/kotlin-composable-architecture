@@ -49,7 +49,7 @@ private val readMe = """
     
 """.trimIndent()
 
-class EffectsBasicFragment : Fragment() {
+class EffectsBasic : Fragment() {
 
     private lateinit var binding: FragmentEffectsBasicBinding
 

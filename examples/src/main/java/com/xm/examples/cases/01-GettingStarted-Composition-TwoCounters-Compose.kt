@@ -33,7 +33,7 @@ private val readMe = """
   state of the application and any actions that can affect that state or the outside world.
 """.trimIndent()
 
-class TwoCountersComposeFragment : Fragment() {
+class GettingStartedCompositionTwoCountersCompose : Fragment() {
 
     private val viewModel: TwoCountersViewModel by viewModels()
 
