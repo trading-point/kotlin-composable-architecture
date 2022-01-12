@@ -7,6 +7,7 @@ import com.xm.examples.databinding.ActivityMainBinding
 import com.xm.examples.fragments.EffectsCancellationFragment
 import com.xm.examples.fragments.CounterFragment
 import com.xm.examples.fragments.EffectsBasicFragment
+import com.xm.examples.fragments.TwoCountersComposeFragment
 import com.xm.examples.fragments.TwoCountersFragment
 
 class MainActivity : AppCompatActivity(), Callback {
@@ -48,6 +49,13 @@ class MainActivity : AppCompatActivity(), Callback {
     override fun onTwoCountersClicked() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, TwoCountersFragment(), null)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    override fun onTwoCountersComposeClicked() {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, TwoCountersComposeFragment(), null)
             .addToBackStack(null)
             .commit()
     }

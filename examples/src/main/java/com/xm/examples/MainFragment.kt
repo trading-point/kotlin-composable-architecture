@@ -37,6 +37,7 @@ class MainFragment : Fragment() {
         with(binding) {
             btnBasics.setOnClickListener { callback.onBasicClicked() }
             btnPullback.setOnClickListener { callback.onTwoCountersClicked() }
+            btnPullbackCompose.setOnClickListener { callback.onTwoCountersComposeClicked() }
             btnEffects.setOnClickListener { callback.onEffectsBasicClicked() }
             btnCancellation.setOnClickListener { callback.onCancellationClicked() }
         }
@@ -52,6 +53,8 @@ interface Callback {
     fun onBasicClicked()
 
     fun onTwoCountersClicked()
+
+    fun onTwoCountersComposeClicked()
 
     fun onEffectsBasicClicked()
 

@@ -22,6 +22,13 @@
         android:text="Pullback and Combine" />
 
     <Button
+        android:id="@+id/btn_pullback_compose"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pullback and Combine (Jetpack Compose)" />
+
+    <Button
         android:id="@+id/btn_effects"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="match_parent"
