@@ -27,7 +27,7 @@ private val readMe = """
   state of the application and any actions that can affect that state or the outside world.
 """.trimIndent()
 
-class CounterFragment : Fragment() {
+class GettingStartedCounter : Fragment() {
 
     private lateinit var binding: FragmentCounterBinding
 

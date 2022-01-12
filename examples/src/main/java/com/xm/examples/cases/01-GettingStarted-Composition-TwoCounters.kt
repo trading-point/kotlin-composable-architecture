@@ -26,7 +26,7 @@ private val readMe = """
   It reuses the domain of the counter screen and embeds it, twice, in a larger domain.
 """.trimIndent()
 
-class TwoCountersFragment : Fragment() {
+class GettingStartedCompositionTwoCounters : Fragment() {
 
     private lateinit var binding: FragmentTwoCountersBinding
 

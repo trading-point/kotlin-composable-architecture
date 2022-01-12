@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.xm.examples.databinding.ActivityMainBinding
-import com.xm.examples.cases.EffectsCancellationFragment
-import com.xm.examples.cases.CounterFragment
-import com.xm.examples.cases.EffectsBasicFragment
-import com.xm.examples.cases.TwoCountersComposeFragment
-import com.xm.examples.cases.TwoCountersFragment
+import com.xm.examples.cases.EffectsCancellation
+import com.xm.examples.cases.GettingStartedCounter
+import com.xm.examples.cases.EffectsBasic
+import com.xm.examples.cases.GettingStartedCompositionTwoCountersCompose
+import com.xm.examples.cases.GettingStartedCompositionTwoCounters
 
 class MainActivity : AppCompatActivity(), Callback {
 
@@ -41,35 +41,35 @@ class MainActivity : AppCompatActivity(), Callback {
 
     override fun onBasicClicked() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, CounterFragment(), null)
+            .replace(R.id.main_container, GettingStartedCounter(), null)
             .addToBackStack(null)
             .commit()
     }
 
     override fun onTwoCountersClicked() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, TwoCountersFragment(), null)
+            .replace(R.id.main_container, GettingStartedCompositionTwoCounters(), null)
             .addToBackStack(null)
             .commit()
     }
 
     override fun onTwoCountersComposeClicked() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, TwoCountersComposeFragment(), null)
+            .replace(R.id.main_container, GettingStartedCompositionTwoCountersCompose(), null)
             .addToBackStack(null)
             .commit()
     }
 
     override fun onEffectsBasicClicked() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, EffectsBasicFragment(), null)
+            .replace(R.id.main_container, EffectsBasic(), null)
             .addToBackStack(null)
             .commit()
     }
 
     override fun onCancellationClicked() {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, EffectsCancellationFragment(), null)
+            .replace(R.id.main_container, EffectsCancellation(), null)
             .addToBackStack(null)
             .commit()
     }
