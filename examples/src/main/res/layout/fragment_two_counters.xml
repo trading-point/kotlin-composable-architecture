@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="@string/two_counters_text"
+        android:id="@+id/tv_readme"
         style="@style/ReadmeText"
         android:layout_marginHorizontal="22dp"
         android:layout_width="match_parent"

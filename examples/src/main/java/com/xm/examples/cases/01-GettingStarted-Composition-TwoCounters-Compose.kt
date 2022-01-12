@@ -18,15 +18,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy.DisposeOnLifecycleDestroyed
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.xm.examples.MainActivity
-import com.xm.examples.R
 import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
+
+private val readMe = """
+  This screen demonstrates the basics of the Composable Architecture in an archetypal counter application.
+  
+  The domain of the application is modeled using simple data types that correspond to the mutable
+  state of the application and any actions that can affect that state or the outside world.
+""".trimIndent()
 
 class TwoCountersComposeFragment : Fragment() {
 
@@ -58,7 +63,7 @@ class TwoCountersComposeFragment : Fragment() {
 fun TwoCountersScreen(viewModel: TwoCountersViewModel) {
 
     Column(Modifier.padding(horizontal = 22.dp)) {
-        Text(stringResource(R.string.two_counters_text).uppercase(), fontSize = 18.sp)
+        Text(readMe, fontSize = 18.sp)
 
         Row(
             horizontalArrangement = Arrangement.Center,
