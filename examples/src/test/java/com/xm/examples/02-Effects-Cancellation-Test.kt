@@ -24,7 +24,6 @@ import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
-import java.util.concurrent.TimeUnit
 
 class EffectsCancellationTest {
 
@@ -35,6 +34,14 @@ class EffectsCancellationTest {
     fun testTrivia_SuccessfulRequest() {
         val env = mock(EffectsCancellationEnvironment::class.java)
 
+        val testScheduler = Schedulers.trampoline()
+        `when`(env.schedulerProvider)
+            .thenReturn(schedulerProvider)
+        `when`(env.schedulerProvider.io())
+            .thenReturn(testScheduler)
+        `when`(env.schedulerProvider.mainThread())
+            .thenReturn(testScheduler)
+
         `when`(env.fact)
             .thenReturn(factClient)
 
@@ -44,10 +51,10 @@ class EffectsCancellationTest {
 
         TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert(
             send(StepperIncrement(1)) {
-                it.copy(1)
+                it.copy(2)
             },
-            send(StepperDecrement(0)) {
-                it.copy(0)
+            send(StepperDecrement(2)) {
+                it.copy(1)
             },
             send(TriviaButtonTapped) {
                 it.copy(isTriviaRequestInFlight = true)
