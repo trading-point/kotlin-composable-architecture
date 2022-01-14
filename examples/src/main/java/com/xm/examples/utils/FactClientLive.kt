@@ -1,12 +1,13 @@
 package com.xm.examples.utils
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import io.reactivex.rxjava3.core.Single
 import java.net.URL
 
 interface FactClient
 
-object FactClientLive : FactClient {
+class FactClientLive : FactClient {
 
     fun execute(number: String): Single<Result<String>> =
         Single.fromCallable {

@@ -14,11 +14,13 @@ import com.xm.examples.cases.EffectsBasicsAction.IncrementButtonTapped
 import com.xm.examples.cases.EffectsBasicsAction.NumberFactButtonTapped
 import com.xm.examples.cases.EffectsBasicsAction.NumberFactResponse
 import com.xm.examples.databinding.FragmentEffectsBasicBinding
+import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
 import com.xm.tka.Store
+import com.xm.tka.cancellable
 import com.xm.tka.toEffect
 import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
@@ -107,7 +109,7 @@ class EffectsBasicViewModel : ViewModel() {
     private val store = Store(
         initialState = EffectsBasicsState(),
         reducer = effectsBasicReducer,
-        environment = EffectsBasicsEnvironment(FactClientLive, SchedulerProvider)
+        environment = EffectsBasicsEnvironment(FactClientLive(), SchedulerProvider())
     )
 
     val viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction> = store.view()
@@ -130,29 +132,29 @@ sealed class EffectsBasicsAction {
 
 interface EffectsBasicsEnvironment {
     val fact: FactClientLive
-    val schedulerProvider: SchedulerProvider
+    val schedulerProvider: BaseSchedulerProvider
 
     companion object {
 
         operator fun invoke(
             fact: FactClientLive,
-            schedulerProvider: SchedulerProvider
+            schedulerProvider: BaseSchedulerProvider
         ): EffectsBasicsEnvironment = object : EffectsBasicsEnvironment {
             override val fact: FactClientLive = fact
-            override val schedulerProvider: SchedulerProvider = schedulerProvider
+            override val schedulerProvider: BaseSchedulerProvider = schedulerProvider
         }
     }
 }
 
-private val effectsBasicReducer =
+val effectsBasicReducer =
     Reducer<EffectsBasicsState, EffectsBasicsAction, EffectsBasicsEnvironment> { state, action, env ->
         when (action) {
             DecrementButtonTapped -> state.copy(
                 count = state.count - 1,
                 numberFact = null
             ) + Effects.just(IncrementButtonTapped)
-                .delay(1, TimeUnit.SECONDS)
-                .observeOn(env.schedulerProvider.mainThread())
+                .delay(1, TimeUnit.SECONDS, env.schedulerProvider.mainThread())
+                // .observeOn(env.schedulerProvider.mainThread())
                 .cast()
 
             IncrementButtonTapped -> state.copy(
@@ -170,6 +172,7 @@ private val effectsBasicReducer =
                 .observeOn(env.schedulerProvider.mainThread())
                 .map<EffectsBasicsAction> { NumberFactResponse(it) }
                 .toEffect()
+                .cancellable(FactId)
 
             is NumberFactResponse ->
                 action.response.fold(
@@ -188,3 +191,5 @@ private val effectsBasicReducer =
                 )
         }
     }
+
+object FactId

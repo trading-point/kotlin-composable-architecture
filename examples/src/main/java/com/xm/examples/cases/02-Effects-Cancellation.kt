@@ -15,6 +15,7 @@ import com.xm.examples.cases.EffectsCancellationAction.StepperIncrement
 import com.xm.examples.cases.EffectsCancellationAction.TriviaButtonTapped
 import com.xm.examples.cases.EffectsCancellationAction.TriviaResponse
 import com.xm.examples.databinding.FragmentCancellationBinding
+import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
 import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
@@ -102,7 +103,7 @@ class EffectsCancellationViewModel : ViewModel() {
     private val store = Store(
         initialState = EffectCancellationState(),
         reducer = effectsCancellationReducer,
-        environment = EffectsCancellationEnvironment(FactClientLive, SchedulerProvider)
+        environment = EffectsCancellationEnvironment(FactClientLive(), SchedulerProvider())
     )
 
     val viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction> = store.view()
@@ -126,36 +127,36 @@ sealed class EffectsCancellationAction {
 
 interface EffectsCancellationEnvironment {
     val fact: FactClientLive
-    val schedulerProvider: SchedulerProvider
+    val schedulerProvider: BaseSchedulerProvider
 
     companion object {
 
         operator fun invoke(
             fact: FactClientLive,
-            mainQueue: SchedulerProvider
+            schedulerProvider: BaseSchedulerProvider
         ): EffectsCancellationEnvironment = object : EffectsCancellationEnvironment {
             override val fact: FactClientLive = fact
-            override val schedulerProvider: SchedulerProvider = mainQueue
+            override val schedulerProvider: BaseSchedulerProvider = schedulerProvider
         }
     }
 }
 
 object TriviaRequestId
 
-private val effectsCancellationReducer =
+val effectsCancellationReducer =
     Reducer<EffectCancellationState, EffectsCancellationAction, EffectsCancellationEnvironment> { state, action, env ->
         when (action) {
             is StepperDecrement -> state.copy(
                 count = action.num - 1,
                 currentTrivia = null,
                 isTriviaRequestInFlight = false
-            ) + Effects.none()
+            ) + Effects.cancel(TriviaRequestId)
 
             is StepperIncrement -> state.copy(
                 count = action.num + 1,
                 currentTrivia = null,
                 isTriviaRequestInFlight = false
-            ) + Effects.none()
+            ) + Effects.cancel(TriviaRequestId)
 
             CancelButtonTapped -> state.copy(
                 isTriviaRequestInFlight = false

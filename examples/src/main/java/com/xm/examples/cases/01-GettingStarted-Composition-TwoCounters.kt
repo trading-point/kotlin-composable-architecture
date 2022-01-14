@@ -121,7 +121,7 @@ sealed class TwoCounterAction {
 
 object TwoCounterEnvironment
 
-private val twoCountersReducer: Reducer<TwoCounterState, TwoCounterAction, TwoCounterEnvironment> =
+val twoCountersReducer: Reducer<TwoCounterState, TwoCounterAction, TwoCounterEnvironment> =
     Reducer.combine(
         counterReducer.pullback(
             toLocalState = StateLens(
