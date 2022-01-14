@@ -318,7 +318,7 @@ No debugging tools have been ported yet... apart from a simple `reducer.debug()`
 
 ## Requirements
 
-This port of The Composable Architecture uses the RxJava 2 framework.
+This port of The Composable Architecture uses the RxJava 3 framework.
 
 <!-- ## Installation
 
