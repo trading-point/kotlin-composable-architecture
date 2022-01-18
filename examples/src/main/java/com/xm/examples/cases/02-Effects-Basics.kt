@@ -60,11 +60,6 @@ class EffectsBasic : Fragment() {
     private val viewModel: EffectsBasicViewModel by viewModels()
     private lateinit var viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction>
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        viewStore = viewModel.viewStore
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -78,6 +73,8 @@ class EffectsBasic : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {

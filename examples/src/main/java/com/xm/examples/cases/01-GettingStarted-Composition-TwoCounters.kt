@@ -1,6 +1,5 @@
 package com.xm.examples.cases
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,11 +33,8 @@ class GettingStartedCompositionTwoCounters : Fragment() {
 
     private val viewModel: TwoCountersViewModel by viewModels()
     private lateinit var viewStore: ViewStore<TwoCounterState, TwoCounterAction>
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        viewStore = viewModel.viewStore
-    }
+    private lateinit var scopeCounter1: Store<CounterState, CounterAction>
+    private lateinit var scopeCounter2: Store<CounterState, CounterAction>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,6 +50,10 @@ class GettingStartedCompositionTwoCounters : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        viewStore = viewModel.store.view()
+        scopeCounter1 = viewModel.store.scopeCounter1()
+        scopeCounter2 = viewModel.store.scopeCounter2()
+
         // first counter
         viewStore.states
             .subscribe {
@@ -63,10 +63,10 @@ class GettingStartedCompositionTwoCounters : Fragment() {
 
         with(binding) {
             btnFirstDecrement.setOnClickListener {
-                viewModel.scopeCounter1.send(CounterAction.DecrementButtonTapped)
+                scopeCounter1.send(CounterAction.DecrementButtonTapped)
             }
             btnFirstIncrement.setOnClickListener {
-                viewModel.scopeCounter1.send(CounterAction.IncrementButtonTapped)
+                scopeCounter1.send(CounterAction.IncrementButtonTapped)
             }
         }
 
@@ -79,10 +79,10 @@ class GettingStartedCompositionTwoCounters : Fragment() {
 
         with(binding) {
             btnSecondDecrement.setOnClickListener {
-                viewModel.scopeCounter2.send(CounterAction.DecrementButtonTapped)
+                scopeCounter2.send(CounterAction.DecrementButtonTapped)
             }
             btnSecondIncrement.setOnClickListener {
-                viewModel.scopeCounter2.send(CounterAction.IncrementButtonTapped)
+                scopeCounter2.send(CounterAction.IncrementButtonTapped)
             }
         }
     }
@@ -95,16 +95,11 @@ class GettingStartedCompositionTwoCounters : Fragment() {
 
 class TwoCountersViewModel : ViewModel() {
 
-    private val store = Store(
+    val store = Store(
         initialState = TwoCounterState(),
         reducer = twoCountersReducer,
         environment = TwoCounterEnvironment
     )
-
-    val viewStore: ViewStore<TwoCounterState, TwoCounterAction> = store.view()
-
-    val scopeCounter1: Store<CounterState, CounterAction> = store.scopeCounter1()
-    val scopeCounter2: Store<CounterState, CounterAction> = store.scopeCounter2()
 }
 
 // Domain

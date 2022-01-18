@@ -71,7 +71,7 @@ fun TwoCountersScreen(viewModel: TwoCountersViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Counter 1")
-            CounterScreenView(viewModel.scopeCounter1.view())
+            CounterScreenView(viewModel.store.scopeCounter1().view())
         }
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -79,7 +79,7 @@ fun TwoCountersScreen(viewModel: TwoCountersViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Counter 2")
-            CounterScreenView(viewModel.scopeCounter2.view())
+            CounterScreenView(viewModel.store.scopeCounter2().view())
         }
     }
 }

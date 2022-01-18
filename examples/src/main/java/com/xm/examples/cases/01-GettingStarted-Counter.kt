@@ -36,11 +36,6 @@ class GettingStartedCounter : Fragment() {
     private val viewModel: CounterViewModel by viewModels()
     private lateinit var viewStore: ViewStore<CounterState, CounterAction>
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        viewStore = viewModel.viewStore
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,6 +49,8 @@ class GettingStartedCounter : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {
