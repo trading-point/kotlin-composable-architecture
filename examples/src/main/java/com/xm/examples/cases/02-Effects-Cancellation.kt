@@ -1,6 +1,5 @@
 package com.xm.examples.cases
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,11 +48,6 @@ class EffectsCancellation : Fragment() {
     private val viewModel: EffectsCancellationViewModel by viewModels()
     private lateinit var viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction>
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        viewStore = viewModel.viewStore
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,6 +61,8 @@ class EffectsCancellation : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {
