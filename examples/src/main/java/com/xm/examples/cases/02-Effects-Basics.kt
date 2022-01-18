@@ -28,7 +28,7 @@ import io.reactivex.rxjava3.kotlin.cast
 import java.util.concurrent.TimeUnit
 
 private val readMe = """
-  This screen demonstrates how to introduce side effects into a feature built with the \n
+  This screen demonstrates how to introduce side effects into a feature built with the
   Composable Architecture.
 
   A side effect is a unit of work that needs to be performed in the outside world. For example, an

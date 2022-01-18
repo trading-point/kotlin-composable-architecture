@@ -18,19 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy.DisposeOnLifecycleDestroyed
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.xm.examples.MainActivity
+import com.xm.examples.R
 import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 
 private val readMe = """
-  This screen demonstrates the basics of the Composable Architecture in an archetypal counter application.
+  This screen demonstrates how to take small features and compose them into bigger ones using the
+  `pullback` and `combine` operators on reducers, and the `scope` operator on stores.
   
-  The domain of the application is modeled using simple data types that correspond to the mutable
-  state of the application and any actions that can affect that state or the outside world.
+  It reuses the domain of the counter screen and embeds it, twice, in a larger domain.
 """.trimIndent()
 
 class GettingStartedCompositionTwoCountersCompose : Fragment() {
@@ -63,7 +65,7 @@ class GettingStartedCompositionTwoCountersCompose : Fragment() {
 fun TwoCountersScreen(viewModel: TwoCountersViewModel) {
 
     Column(Modifier.padding(horizontal = 22.dp)) {
-        Text(readMe, fontSize = 18.sp)
+        Text(readMe.uppercase(), fontSize = 14.sp, color = colorResource(R.color.grey))
 
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -86,7 +88,7 @@ fun TwoCountersScreen(viewModel: TwoCountersViewModel) {
 
 @Composable
 fun CounterScreenView(viewStore: ViewStore<CounterState, CounterAction>) {
-    val counter: Int = viewStore.states.subscribeAsState(CounterState(0)).value.count
+    val counter: Int = viewStore.states.subscribeAsState(viewStore.currentState).value.count
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
