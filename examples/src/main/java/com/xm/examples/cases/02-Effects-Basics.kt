@@ -1,6 +1,5 @@
 package com.xm.examples.cases
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -66,7 +65,7 @@ class EffectsBasic : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentEffectsBasicBinding.inflate(layoutInflater)
-        binding.tvReadme.text = readMe
+        binding.readme.text = readMe
         return binding.root
     }
 
@@ -79,8 +78,8 @@ class EffectsBasic : Fragment() {
         viewStore.states
             .subscribe {
                 with(binding) {
-                    tvNumber.text = it.count.toString()
-                    tvText.text = it.numberFact
+                    number.text = it.count.toString()
+                    response.text = it.numberFact
 
                     progressBar.visibility =
                         if (it.isNumberFactRequestInFlight) View.VISIBLE else View.GONE
@@ -89,9 +88,9 @@ class EffectsBasic : Fragment() {
             .addTo(compositeDisposable)
 
         with(binding) {
-            btnDecrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
-            btnIncrement.setOnClickListener { viewStore.send(IncrementButtonTapped) }
-            btnNumberFact.setOnClickListener { viewStore.send(NumberFactButtonTapped) }
+            decrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
+            increment.setOnClickListener { viewStore.send(IncrementButtonTapped) }
+            numberFactButton.setOnClickListener { viewStore.send(NumberFactButtonTapped) }
         }
     }
 

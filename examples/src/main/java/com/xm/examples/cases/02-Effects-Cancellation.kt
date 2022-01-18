@@ -54,7 +54,7 @@ class EffectsCancellation : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCancellationBinding.inflate(layoutInflater)
-        binding.tvReadme.text = readMe
+        binding.readme.text = readMe
         return binding.root
     }
 
@@ -67,24 +67,24 @@ class EffectsCancellation : Fragment() {
         viewStore.states
             .subscribe {
                 with(binding) {
-                    tvNumber.text = it.count.toString()
-                    tvText.text = it.currentTrivia ?: ""
+                    number.text = it.count.toString()
+                    response.text = it.currentTrivia ?: ""
 
-                    btnCancel.visibility =
+                    cancel.visibility =
                         if (it.isTriviaRequestInFlight) View.VISIBLE else View.GONE
                 }
             }
             .addTo(compositeDisposable)
 
         with(binding) {
-            btnDecrement.setOnClickListener {
-                viewStore.send(StepperDecrement(tvNumber.text.toString().toInt()))
+            decrement.setOnClickListener {
+                viewStore.send(StepperDecrement(number.text.toString().toInt()))
             }
-            btnIncrement.setOnClickListener {
-                viewStore.send(StepperIncrement(tvNumber.text.toString().toInt()))
+            increment.setOnClickListener {
+                viewStore.send(StepperIncrement(number.text.toString().toInt()))
             }
-            btnNumberFact.setOnClickListener { viewStore.send(TriviaButtonTapped) }
-            btnCancel.setOnClickListener { viewStore.send(CancelButtonTapped) }
+            numberFactButton.setOnClickListener { viewStore.send(TriviaButtonTapped) }
+            cancel.setOnClickListener { viewStore.send(CancelButtonTapped) }
         }
     }
 

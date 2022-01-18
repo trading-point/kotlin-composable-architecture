@@ -42,7 +42,7 @@ class GettingStartedCompositionTwoCounters : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentTwoCountersBinding.inflate(layoutInflater)
-        binding.tvReadme.text = readMe
+        binding.readme.text = readMe
         return binding.root
     }
 
@@ -57,15 +57,15 @@ class GettingStartedCompositionTwoCounters : Fragment() {
         // first counter
         viewStore.states
             .subscribe {
-                binding.tvFirstNumber.text = it.firstCounter.count.toString()
+                binding.firstNumber.text = it.firstCounter.count.toString()
             }
             .addTo(compositeDisposable)
 
         with(binding) {
-            btnFirstDecrement.setOnClickListener {
+            firstDecrement.setOnClickListener {
                 scopeCounter1.send(CounterAction.DecrementButtonTapped)
             }
-            btnFirstIncrement.setOnClickListener {
+            firstIncrement.setOnClickListener {
                 scopeCounter1.send(CounterAction.IncrementButtonTapped)
             }
         }
@@ -73,15 +73,15 @@ class GettingStartedCompositionTwoCounters : Fragment() {
         // second counter
         viewStore.states
             .subscribe {
-                binding.tvSecondNumber.text = it.secondCounter.count.toString()
+                binding.secondNumber.text = it.secondCounter.count.toString()
             }
             .addTo(compositeDisposable)
 
         with(binding) {
-            btnSecondDecrement.setOnClickListener {
+            secondDecrement.setOnClickListener {
                 scopeCounter2.send(CounterAction.DecrementButtonTapped)
             }
-            btnSecondIncrement.setOnClickListener {
+            secondIncrement.setOnClickListener {
                 scopeCounter2.send(CounterAction.IncrementButtonTapped)
             }
         }

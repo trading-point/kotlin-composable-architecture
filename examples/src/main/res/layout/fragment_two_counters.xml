@@ -5,7 +5,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/tv_readme"
+        android:id="@+id/readme"
         style="@style/ReadmeText"
         android:layout_marginHorizontal="22dp"
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"/>
 
         <Button
-            android:id="@+id/btn_first_decrement"
+            android:id="@+id/first_decrement"
             android:text="-"
             android:textSize="22sp"
             style="@style/Widget.AppCompat.Button.Borderless"
@@ -32,14 +32,14 @@
 
         <TextView
             android:text="0"
-            android:id="@+id/tv_first_number"
+            android:id="@+id/first_number"
             android:textSize="22sp"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <Button
-            android:id="@+id/btn_first_increment"
+            android:id="@+id/first_increment"
             android:text="+"
             android:textSize="22sp"
             style="@style/Widget.AppCompat.Button.Borderless"
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"/>
 
         <Button
-            android:id="@+id/btn_second_decrement"
+            android:id="@+id/second_decrement"
             android:text="-"
             android:textSize="22sp"
             style="@style/Widget.AppCompat.Button.Borderless"
@@ -70,14 +70,14 @@
 
         <TextView
             android:text="0"
-            android:id="@+id/tv_second_number"
+            android:id="@+id/second_number"
             android:textSize="22sp"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <Button
-            android:id="@+id/btn_second_increment"
+            android:id="@+id/second_increment"
             android:text="+"
             android:textSize="22sp"
             style="@style/Widget.AppCompat.Button.Borderless"
