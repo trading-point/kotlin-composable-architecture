@@ -25,6 +25,7 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import com.xm.examples.R
 
 private val readMe = """
   This screen demonstrates how one can cancel in-flight effects in the Composable Architecture.
@@ -60,6 +61,7 @@ class EffectsCancellation : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.effects_cancellation_toolbar_title)
 
         viewStore = viewModel.viewStore
 
@@ -103,8 +105,6 @@ class EffectsCancellationViewModel : ViewModel() {
 
     val viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction> = store.view()
 }
-
-// Domain
 
 data class EffectCancellationState(
     val count: Int = 0,

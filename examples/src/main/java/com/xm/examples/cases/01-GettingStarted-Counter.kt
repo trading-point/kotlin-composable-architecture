@@ -1,6 +1,5 @@
 package com.xm.examples.cases
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +18,7 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import com.xm.examples.R
 
 private val readMe = """
   This screen demonstrates the basics of the Composable Architecture in an archetypal counter application.
@@ -49,6 +49,7 @@ class GettingStartedCounter : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.getting_started_counter_toolbar_title)
 
         viewStore = viewModel.viewStore
 
@@ -78,8 +79,6 @@ class CounterViewModel : ViewModel() {
 
     val viewStore: ViewStore<CounterState, CounterAction> = store.view()
 }
-
-// Domain
 
 data class CounterState(val count: Int = 0)
 

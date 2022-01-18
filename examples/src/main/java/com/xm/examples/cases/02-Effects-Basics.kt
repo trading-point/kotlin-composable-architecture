@@ -26,6 +26,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import java.util.concurrent.TimeUnit
+import com.xm.examples.R
 
 private val readMe = """
   This screen demonstrates how to introduce side effects into a feature built with the
@@ -71,6 +72,7 @@ class EffectsBasic : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.effects_basics_toolbar_title)
 
         viewStore = viewModel.viewStore
 
@@ -109,8 +111,6 @@ class EffectsBasicViewModel : ViewModel() {
 
     val viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction> = store.view()
 }
-
-// Domain
 
 data class EffectsBasicsState(
     val count: Int = 0,

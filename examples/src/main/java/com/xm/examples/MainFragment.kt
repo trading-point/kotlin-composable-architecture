@@ -31,8 +31,8 @@ class MainFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.main_fragment_toolbar_title)
 
         with(binding) {
             btnBasics.setOnClickListener { callback.onBasicClicked() }
