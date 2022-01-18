@@ -17,6 +17,7 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import com.xm.examples.R
 
 private val readMe = """
   This screen demonstrates how to take small features and compose them into bigger ones using the
@@ -49,6 +50,7 @@ class GettingStartedCompositionTwoCounters : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.getting_started_two_counters_toolbar_title)
 
         viewStore = viewModel.store.view()
         scopeCounter1 = viewModel.store.scopeCounter1()
@@ -101,8 +103,6 @@ class TwoCountersViewModel : ViewModel() {
         environment = TwoCounterEnvironment
     )
 }
-
-// Domain
 
 data class TwoCounterState(
     val firstCounter: CounterState = CounterState(),
