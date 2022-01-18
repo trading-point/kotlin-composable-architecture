@@ -153,8 +153,8 @@ val effectsBasicReducer =
                 count = state.count - 1,
                 numberFact = null
             ) + Effects.just(IncrementButtonTapped)
-                .delay(1, TimeUnit.SECONDS, env.schedulerProvider.mainThread())
-                // .observeOn(env.schedulerProvider.mainThread())
+                .delay(1, TimeUnit.SECONDS)
+                .observeOn(env.schedulerProvider.mainThread())
                 .cast()
 
             IncrementButtonTapped -> state.copy(

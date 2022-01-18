@@ -1,7 +1,10 @@
 package com.xm.examples
 
 import com.xm.examples.cases.EffectsBasicsAction
+import com.xm.examples.cases.EffectsBasicsAction.DecrementButtonTapped
 import com.xm.examples.cases.EffectsBasicsAction.IncrementButtonTapped
+import com.xm.examples.cases.EffectsBasicsAction.NumberFactButtonTapped
+import com.xm.examples.cases.EffectsBasicsAction.NumberFactResponse
 import com.xm.examples.cases.EffectsBasicsEnvironment
 import com.xm.examples.cases.EffectsBasicsState
 import com.xm.examples.cases.FactId
@@ -14,6 +17,7 @@ import com.xm.tka.test.TestStore.Step.Companion.`do`
 import com.xm.tka.test.TestStore.Step.Companion.receive
 import com.xm.tka.test.TestStore.Step.Companion.send
 import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.schedulers.TestScheduler
 import org.junit.Test
@@ -34,15 +38,16 @@ class EffectsBasicTest {
         val testScheduler = TestScheduler()
         `when`(env.schedulerProvider)
             .thenReturn(schedulerProvider)
-
         `when`(env.schedulerProvider.mainThread())
             .thenReturn(testScheduler)
+
+        RxJavaPlugins.setComputationSchedulerHandler { testScheduler }
 
         TestStore(EffectsBasicsState(count = 0), effectsBasicReducer, env).assert(
             send(IncrementButtonTapped) {
                 it.copy(1)
             },
-            send(EffectsBasicsAction.DecrementButtonTapped) {
+            send(DecrementButtonTapped) {
                 it.copy(count = 0, numberFact = null)
             },
             `do` { testScheduler.advanceTimeBy(1, TimeUnit.SECONDS) },
@@ -77,10 +82,10 @@ class EffectsBasicTest {
             send(IncrementButtonTapped) {
                 it.copy(1)
             },
-            send(EffectsBasicsAction.NumberFactButtonTapped) {
+            send(NumberFactButtonTapped) {
                 it.copy(isNumberFactRequestInFlight = true)
             },
-            receive(EffectsBasicsAction.NumberFactResponse(response)) {
+            receive(NumberFactResponse(response)) {
                 it.copy(
                     isNumberFactRequestInFlight = false,
                     numberFact = "1 is a good number Brent"
