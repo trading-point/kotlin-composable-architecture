@@ -42,7 +42,7 @@ class GettingStartedCounter : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentCounterBinding.inflate(layoutInflater)
-        binding.tvReadme.text = readMe
+        binding.readme.text = readMe
         return binding.root
     }
 
@@ -54,12 +54,12 @@ class GettingStartedCounter : Fragment() {
 
         viewStore.states
             .subscribe {
-                binding.tvNumber.text = it.count.toString()
+                binding.number.text = it.count.toString()
             }
             .addTo(compositeDisposable)
 
-        binding.btnDecrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
-        binding.btnIncrement.setOnClickListener { viewStore.send(IncrementButtonTapped) }
+        binding.decrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
+        binding.increment.setOnClickListener { viewStore.send(IncrementButtonTapped) }
     }
 
     override fun onDestroyView() {

@@ -11,7 +11,7 @@
         android:paddingBottom="32dp">
 
         <TextView
-            android:id="@id/tv_readme"
+            android:id="@id/readme"
             style="@style/ReadmeText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btn_decrement"
+                android:id="@+id/decrement"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -32,7 +32,7 @@
                 android:textSize="22sp" />
 
             <TextView
-                android:id="@+id/tv_number"
+                android:id="@+id/number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -40,7 +40,7 @@
                 android:textSize="22sp" />
 
             <Button
-                android:id="@+id/btn_increment"
+                android:id="@+id/increment"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_number_fact"
+            android:id="@+id/numberFactButton"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,13 +62,13 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/tv_text"
+                android:id="@+id/response"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="22dp" />
 
             <Button
-                android:id="@+id/btn_cancel"
+                android:id="@+id/cancel"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
