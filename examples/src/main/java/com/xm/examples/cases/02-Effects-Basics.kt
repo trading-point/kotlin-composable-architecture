@@ -15,7 +15,6 @@ import com.xm.examples.cases.EffectsBasicsAction.NumberFactResponse
 import com.xm.examples.databinding.FragmentEffectsBasicBinding
 import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
-import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
 import com.xm.tka.Store
@@ -105,7 +104,7 @@ class EffectsBasicViewModel : ViewModel() {
     private val store = Store(
         initialState = EffectsBasicsState(),
         reducer = effectsBasicReducer,
-        environment = EffectsBasicsEnvironment(FactClientLive(), SchedulerProvider())
+        environment = EffectsBasicsEnvironment(FactClientLive(), BaseSchedulerProvider())
     )
 
     val viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction> = store.view()
@@ -126,21 +125,10 @@ sealed class EffectsBasicsAction {
     data class NumberFactResponse(val response: Result<String>) : EffectsBasicsAction()
 }
 
-interface EffectsBasicsEnvironment {
-    val fact: FactClientLive
+class EffectsBasicsEnvironment(
+    val fact: FactClientLive,
     val schedulerProvider: BaseSchedulerProvider
-
-    companion object {
-
-        operator fun invoke(
-            fact: FactClientLive,
-            schedulerProvider: BaseSchedulerProvider
-        ): EffectsBasicsEnvironment = object : EffectsBasicsEnvironment {
-            override val fact: FactClientLive = fact
-            override val schedulerProvider: BaseSchedulerProvider = schedulerProvider
-        }
-    }
-}
+)
 
 val effectsBasicReducer =
     Reducer<EffectsBasicsState, EffectsBasicsAction, EffectsBasicsEnvironment> { state, action, env ->
