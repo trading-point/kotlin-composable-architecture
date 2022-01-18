@@ -16,7 +16,6 @@ import com.xm.examples.cases.EffectsCancellationAction.TriviaResponse
 import com.xm.examples.databinding.FragmentCancellationBinding
 import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
-import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
 import com.xm.tka.Store
@@ -99,7 +98,7 @@ class EffectsCancellationViewModel : ViewModel() {
     private val store = Store(
         initialState = EffectCancellationState(),
         reducer = effectsCancellationReducer,
-        environment = EffectsCancellationEnvironment(FactClientLive(), SchedulerProvider())
+        environment = EffectsCancellationEnvironment(FactClientLive(), BaseSchedulerProvider())
     )
 
     val viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction> = store.view()

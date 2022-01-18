@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 /**
  * Provides different types of schedulers.
  */
-class SchedulerProvider : BaseSchedulerProvider {
+class BaseSchedulerProvider : SchedulerProvider {
 
     @NonNull
     override fun io(): Scheduler = Schedulers.io()
@@ -18,7 +18,7 @@ class SchedulerProvider : BaseSchedulerProvider {
     override fun mainThread(): Scheduler = AndroidSchedulers.mainThread()
 }
 
-interface BaseSchedulerProvider {
+interface SchedulerProvider {
     fun io(): Scheduler
 
     fun mainThread(): Scheduler
