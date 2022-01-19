@@ -47,7 +47,7 @@ class GettingStartedCompositionTwoCounters : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
             title = resources.getString(R.string.getting_started_two_counters_toolbar_title)
         }
 

@@ -72,7 +72,7 @@ class EffectsBasic : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
             title = resources.getString(R.string.effects_basics_toolbar_title)
         }
 

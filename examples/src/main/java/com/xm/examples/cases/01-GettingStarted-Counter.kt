@@ -48,7 +48,7 @@ class GettingStartedCounter : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (activity as MainActivity).supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
             title = resources.getString(R.string.getting_started_counter_toolbar_title)
         }
 
