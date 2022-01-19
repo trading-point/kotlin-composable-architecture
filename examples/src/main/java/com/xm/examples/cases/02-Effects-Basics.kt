@@ -27,6 +27,7 @@ import io.reactivex.rxjava3.kotlin.addTo
 import io.reactivex.rxjava3.kotlin.cast
 import java.util.concurrent.TimeUnit
 import com.xm.examples.R
+import com.xm.examples.utils.SchedulerProvider
 
 private val readMe = """
   This screen demonstrates how to introduce side effects into a feature built with the
@@ -57,7 +58,6 @@ class EffectsBasic : Fragment() {
     private val compositeDisposable = CompositeDisposable()
 
     private val viewModel: EffectsBasicViewModel by viewModels()
-    private lateinit var viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,10 +71,12 @@ class EffectsBasic : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.effects_basics_toolbar_title)
+        (activity as MainActivity).supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(false)
+            title = resources.getString(R.string.effects_basics_toolbar_title)
+        }
 
-        viewStore = viewModel.viewStore
+        val viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {
@@ -127,7 +129,7 @@ sealed class EffectsBasicsAction {
 
 class EffectsBasicsEnvironment(
     val fact: FactClientLive,
-    val schedulerProvider: BaseSchedulerProvider
+    val schedulerProvider: SchedulerProvider
 )
 
 val effectsBasicReducer =

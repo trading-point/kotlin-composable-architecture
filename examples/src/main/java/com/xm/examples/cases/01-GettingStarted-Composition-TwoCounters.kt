@@ -33,9 +33,6 @@ class GettingStartedCompositionTwoCounters : Fragment() {
     private var compositeDisposable = CompositeDisposable()
 
     private val viewModel: TwoCountersViewModel by viewModels()
-    private lateinit var viewStore: ViewStore<TwoCounterState, TwoCounterAction>
-    private lateinit var scopeCounter1: Store<CounterState, CounterAction>
-    private lateinit var scopeCounter2: Store<CounterState, CounterAction>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,12 +46,14 @@ class GettingStartedCompositionTwoCounters : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.getting_started_two_counters_toolbar_title)
+        (activity as MainActivity).supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(false)
+            title = resources.getString(R.string.getting_started_two_counters_toolbar_title)
+        }
 
-        viewStore = viewModel.store.view()
-        scopeCounter1 = viewModel.store.scopeCounter1()
-        scopeCounter2 = viewModel.store.scopeCounter2()
+        val viewStore = viewModel.store.view()
+        val scopeCounter1 = viewModel.store.scopeCounter1()
+        val scopeCounter2 = viewModel.store.scopeCounter2()
 
         // first counter
         viewStore.states
