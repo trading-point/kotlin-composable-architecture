@@ -1,23 +1,18 @@
 package com.xm.examples
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.xm.examples.databinding.FragmentMainBinding
 
 class MainFragment : Fragment() {
 
     private lateinit var binding: FragmentMainBinding
 
-    lateinit var callback: Callback
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        setupCallback(context as MainActivity)
-    }
+    private val viewModel: SharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,28 +32,19 @@ class MainFragment : Fragment() {
         }
 
         with(binding) {
-            btnBasics.setOnClickListener { callback.onBasicClicked() }
-            btnPullback.setOnClickListener { callback.onTwoCountersClicked() }
-            btnPullbackCompose.setOnClickListener { callback.onTwoCountersComposeClicked() }
-            btnEffects.setOnClickListener { callback.onEffectsBasicClicked() }
-            btnCancellation.setOnClickListener { callback.onCancellationClicked() }
+            btnBasics.setOnClickListener { viewModel.onItemClicked(Screen.Counter) }
+            btnPullback.setOnClickListener { viewModel.onItemClicked(Screen.TwoCounters) }
+            btnPullbackCompose.setOnClickListener { viewModel.onItemClicked(Screen.TwoCountersCompose) }
+            btnEffects.setOnClickListener { viewModel.onItemClicked(Screen.EffectsBasic) }
+            btnCancellation.setOnClickListener { viewModel.onItemClicked(Screen.EffectsCancellation) }
         }
-    }
-
-    fun setupCallback(callback: MainActivity) {
-        this.callback = callback
     }
 }
 
-interface Callback {
-
-    fun onBasicClicked()
-
-    fun onTwoCountersClicked()
-
-    fun onTwoCountersComposeClicked()
-
-    fun onEffectsBasicClicked()
-
-    fun onCancellationClicked()
+sealed class Screen {
+    object Counter : Screen()
+    object TwoCounters : Screen()
+    object TwoCountersCompose : Screen()
+    object EffectsBasic : Screen()
+    object EffectsCancellation : Screen()
 }

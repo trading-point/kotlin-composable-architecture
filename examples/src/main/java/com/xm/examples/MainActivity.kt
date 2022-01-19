@@ -2,17 +2,24 @@ package com.xm.examples
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.xm.examples.databinding.ActivityMainBinding
-import com.xm.examples.cases.EffectsCancellation
-import com.xm.examples.cases.GettingStartedCounter
+import androidx.fragment.app.Fragment
 import com.xm.examples.cases.EffectsBasic
-import com.xm.examples.cases.GettingStartedCompositionTwoCountersCompose
+import com.xm.examples.cases.EffectsCancellation
 import com.xm.examples.cases.GettingStartedCompositionTwoCounters
+import com.xm.examples.cases.GettingStartedCompositionTwoCountersCompose
+import com.xm.examples.cases.GettingStartedCounter
+import com.xm.examples.databinding.ActivityMainBinding
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.addTo
 
-class MainActivity : AppCompatActivity(), Callback {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    private val viewModel: SharedViewModel by viewModels()
+    private val compositeDisposable = CompositeDisposable()
 
     private lateinit var mainFragment: MainFragment
 
@@ -29,7 +36,22 @@ class MainActivity : AppCompatActivity(), Callback {
                 .commit()
         }
 
-        mainFragment.setupCallback(this)
+        viewModel.selectedScreen.subscribe {
+            when (it) {
+                Screen.Counter -> goToScreen(GettingStartedCounter())
+                Screen.TwoCounters -> goToScreen(GettingStartedCompositionTwoCounters())
+                Screen.TwoCountersCompose -> goToScreen(GettingStartedCompositionTwoCountersCompose())
+                Screen.EffectsBasic -> goToScreen(EffectsBasic())
+                Screen.EffectsCancellation -> goToScreen(EffectsCancellation())
+            }
+        }.addTo(compositeDisposable)
+    }
+
+    private fun goToScreen(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_container, fragment, null)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onBackPressed() {
@@ -39,45 +61,15 @@ class MainActivity : AppCompatActivity(), Callback {
         }
     }
 
-    override fun onBasicClicked() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, GettingStartedCounter(), null)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onTwoCountersClicked() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, GettingStartedCompositionTwoCounters(), null)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onTwoCountersComposeClicked() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, GettingStartedCompositionTwoCountersCompose(), null)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onEffectsBasicClicked() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, EffectsBasic(), null)
-            .addToBackStack(null)
-            .commit()
-    }
-
-    override fun onCancellationClicked() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_container, EffectsCancellation(), null)
-            .addToBackStack(null)
-            .commit()
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> onBackPressed()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        compositeDisposable.clear()
+        super.onDestroy()
     }
 }
