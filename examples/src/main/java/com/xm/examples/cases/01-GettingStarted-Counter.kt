@@ -34,7 +34,6 @@ class GettingStartedCounter : Fragment() {
     private var compositeDisposable = CompositeDisposable()
 
     private val viewModel: CounterViewModel by viewModels()
-    private lateinit var viewStore: ViewStore<CounterState, CounterAction>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,10 +47,12 @@ class GettingStartedCounter : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.getting_started_counter_toolbar_title)
+        (activity as MainActivity).supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(false)
+            title = resources.getString(R.string.getting_started_counter_toolbar_title)
+        }
 
-        viewStore = viewModel.viewStore
+        val viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {

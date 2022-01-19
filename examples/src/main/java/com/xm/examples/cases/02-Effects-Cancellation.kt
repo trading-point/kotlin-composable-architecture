@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
+import com.xm.examples.R
 import com.xm.examples.cases.EffectsCancellationAction.CancelButtonTapped
 import com.xm.examples.cases.EffectsCancellationAction.StepperDecrement
 import com.xm.examples.cases.EffectsCancellationAction.StepperIncrement
@@ -16,6 +17,7 @@ import com.xm.examples.cases.EffectsCancellationAction.TriviaResponse
 import com.xm.examples.databinding.FragmentCancellationBinding
 import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
+import com.xm.examples.utils.SchedulerProvider
 import com.xm.tka.Effects
 import com.xm.tka.Reducer
 import com.xm.tka.Store
@@ -25,7 +27,6 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
-import com.xm.examples.R
 
 private val readMe = """
   This screen demonstrates how one can cancel in-flight effects in the Composable Architecture.
@@ -46,7 +47,6 @@ class EffectsCancellation : Fragment() {
     private val compositeDisposable = CompositeDisposable()
 
     private val viewModel: EffectsCancellationViewModel by viewModels()
-    private lateinit var viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,10 +60,12 @@ class EffectsCancellation : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (activity as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        (activity as MainActivity).supportActionBar?.title = resources.getString(R.string.effects_cancellation_toolbar_title)
+        (activity as MainActivity).supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            title = resources.getString(R.string.effects_cancellation_toolbar_title)
+        }
 
-        viewStore = viewModel.viewStore
+        val viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {
@@ -120,21 +122,10 @@ sealed class EffectsCancellationAction {
     data class TriviaResponse(val response: Result<String>) : EffectsCancellationAction()
 }
 
-interface EffectsCancellationEnvironment {
-    val fact: FactClientLive
-    val schedulerProvider: BaseSchedulerProvider
-
-    companion object {
-
-        operator fun invoke(
-            fact: FactClientLive,
-            schedulerProvider: BaseSchedulerProvider
-        ): EffectsCancellationEnvironment = object : EffectsCancellationEnvironment {
-            override val fact: FactClientLive = fact
-            override val schedulerProvider: BaseSchedulerProvider = schedulerProvider
-        }
-    }
-}
+class EffectsCancellationEnvironment(
+    val fact: FactClientLive,
+    val schedulerProvider: SchedulerProvider
+)
 
 object TriviaRequestId
 
