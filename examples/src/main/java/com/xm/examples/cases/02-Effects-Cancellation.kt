@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
 import com.xm.examples.R
 import com.xm.examples.cases.EffectsCancellationAction.CancelButtonTapped
@@ -47,8 +45,6 @@ class EffectsCancellation : Fragment() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private val viewModel: EffectsCancellationViewModel by viewModels()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,8 +61,6 @@ class EffectsCancellation : Fragment() {
             setDisplayHomeAsUpEnabled(true)
             title = resources.getString(R.string.effects_cancellation_toolbar_title)
         }
-
-        val viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {
@@ -99,17 +93,17 @@ class EffectsCancellation : Fragment() {
         compositeDisposable.clear()
         super.onDestroyView()
     }
-}
 
-class EffectsCancellationViewModel : ViewModel() {
+    companion object {
+        private val store = Store(
+            initialState = EffectCancellationState(),
+            reducer = effectsCancellationReducer,
+            environment = EffectsCancellationEnvironment(FactClientLive(), BaseSchedulerProvider())
+        )
 
-    private val store = Store(
-        initialState = EffectCancellationState(),
-        reducer = effectsCancellationReducer,
-        environment = EffectsCancellationEnvironment(FactClientLive(), BaseSchedulerProvider())
-    )
-
-    val viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction> = store.view()
+        // ViewStore could be provided by a ViewModel or directly injected via a DI framework
+        val viewStore: ViewStore<EffectCancellationState, EffectsCancellationAction> = store.view()
+    }
 }
 
 data class EffectCancellationState(
@@ -157,7 +151,7 @@ val effectsCancellationReducer =
                 isTriviaRequestInFlight = true
             ) + env.fact.execute(state.count.toString())
                 // dummy delay to allow time to cancel
-                .delay(1, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS, env.schedulerProvider.io())
                 .subscribeOn(env.schedulerProvider.io())
                 .observeOn(env.schedulerProvider.mainThread())
                 .map<EffectsCancellationAction> { TriviaResponse(it) }

@@ -45,7 +45,7 @@ class EffectsCancellationTest {
         `when`(env.fact)
             .thenReturn(factClient)
 
-        val response = "0 is a good number Brent"
+        val response = "1 is a good number Brent"
         `when`(factClient.execute("1"))
             .thenReturn(Single.just(Result.success(response)))
 
