@@ -13,7 +13,6 @@ import com.xm.tka.ActionPrism
 import com.xm.tka.Reducer
 import com.xm.tka.StateLens
 import com.xm.tka.Store
-import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
@@ -58,15 +57,16 @@ class GettingStartedCompositionTwoCounters : Fragment() {
         // first counter
         viewStore.states
             .subscribe {
-                binding.firstNumber.text = it.firstCounter.count.toString()
+                binding.counter1.number.text = it.firstCounter.count.toString()
             }
             .addTo(compositeDisposable)
 
         with(binding) {
-            firstDecrement.setOnClickListener {
+            counter1.title.text = "Counter 1"
+            counter1.decrement.setOnClickListener {
                 scopeCounter1.send(CounterAction.DecrementButtonTapped)
             }
-            firstIncrement.setOnClickListener {
+            counter1.increment.setOnClickListener {
                 scopeCounter1.send(CounterAction.IncrementButtonTapped)
             }
         }
@@ -74,15 +74,16 @@ class GettingStartedCompositionTwoCounters : Fragment() {
         // second counter
         viewStore.states
             .subscribe {
-                binding.secondNumber.text = it.secondCounter.count.toString()
+                binding.counter2.number.text = it.secondCounter.count.toString()
             }
             .addTo(compositeDisposable)
 
         with(binding) {
-            secondDecrement.setOnClickListener {
+            counter2.title.text = "Counter 1"
+            counter2.decrement.setOnClickListener {
                 scopeCounter2.send(CounterAction.DecrementButtonTapped)
             }
-            secondIncrement.setOnClickListener {
+            counter2.increment.setOnClickListener {
                 scopeCounter2.send(CounterAction.IncrementButtonTapped)
             }
         }

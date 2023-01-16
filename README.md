@@ -20,7 +20,7 @@
 ## TODO
 - Migrate `forEach` reducers
 - Migrate Debugging tools
-- Migrate Examples (at least one...😅)
+- Migrate more Examples 😅
 
 ## Future work
 - Add supplementary modules for bridging with Android Jetpack

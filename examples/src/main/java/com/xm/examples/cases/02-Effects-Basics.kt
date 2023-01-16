@@ -81,7 +81,7 @@ class EffectsBasic : Fragment() {
         viewStore.states
             .subscribe {
                 with(binding) {
-                    number.text = it.count.toString()
+                    counter.number.text = it.count.toString()
                     response.text = it.numberFact
 
                     progressBar.visibility =
@@ -91,8 +91,8 @@ class EffectsBasic : Fragment() {
             .addTo(compositeDisposable)
 
         with(binding) {
-            decrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
-            increment.setOnClickListener { viewStore.send(IncrementButtonTapped) }
+            counter.decrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
+            counter.increment.setOnClickListener { viewStore.send(IncrementButtonTapped) }
             numberFactButton.setOnClickListener { viewStore.send(NumberFactButtonTapped) }
         }
     }

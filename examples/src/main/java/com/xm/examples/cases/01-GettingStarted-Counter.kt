@@ -56,12 +56,12 @@ class GettingStartedCounter : Fragment() {
 
         viewStore.states
             .subscribe {
-                binding.number.text = it.count.toString()
+                binding.counter.number.text = it.count.toString()
             }
             .addTo(compositeDisposable)
 
-        binding.decrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
-        binding.increment.setOnClickListener { viewStore.send(IncrementButtonTapped) }
+        binding.counter.decrement.setOnClickListener { viewStore.send(DecrementButtonTapped) }
+        binding.counter.increment.setOnClickListener { viewStore.send(IncrementButtonTapped) }
     }
 
     override fun onDestroyView() {

@@ -27,6 +27,7 @@ import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.kotlin.addTo
+import java.util.concurrent.TimeUnit
 
 private val readMe = """
   This screen demonstrates how one can cancel in-flight effects in the Composable Architecture.
@@ -70,8 +71,11 @@ class EffectsCancellation : Fragment() {
         viewStore.states
             .subscribe {
                 with(binding) {
-                    number.text = it.count.toString()
+                    counter.number.text = it.count.toString()
                     response.text = it.currentTrivia ?: ""
+
+                    progressBar.visibility =
+                        if (it.isTriviaRequestInFlight) View.VISIBLE else View.GONE
 
                     cancel.visibility =
                         if (it.isTriviaRequestInFlight) View.VISIBLE else View.GONE
@@ -80,11 +84,11 @@ class EffectsCancellation : Fragment() {
             .addTo(compositeDisposable)
 
         with(binding) {
-            decrement.setOnClickListener {
-                viewStore.send(StepperDecrement(number.text.toString().toInt()))
+            counter.decrement.setOnClickListener {
+                viewStore.send(StepperDecrement(counter.number.text.toString().toInt()))
             }
-            increment.setOnClickListener {
-                viewStore.send(StepperIncrement(number.text.toString().toInt()))
+            counter.increment.setOnClickListener {
+                viewStore.send(StepperIncrement(counter.number.text.toString().toInt()))
             }
             numberFactButton.setOnClickListener { viewStore.send(TriviaButtonTapped) }
             cancel.setOnClickListener { viewStore.send(CancelButtonTapped) }
@@ -152,6 +156,8 @@ val effectsCancellationReducer =
                 currentTrivia = null,
                 isTriviaRequestInFlight = true
             ) + env.fact.execute(state.count.toString())
+                // dummy delay to allow time to cancel
+                .delay(1, TimeUnit.SECONDS)
                 .subscribeOn(env.schedulerProvider.io())
                 .observeOn(env.schedulerProvider.mainThread())
                 .map<EffectsCancellationAction> { TriviaResponse(it) }

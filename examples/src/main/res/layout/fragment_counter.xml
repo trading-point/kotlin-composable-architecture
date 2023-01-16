@@ -1,46 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/readme"
         style="@style/ReadmeText"
-        android:layout_marginHorizontal="22dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="22dp" />
 
-    <LinearLayout
-        android:gravity="center"
-        android:orientation="horizontal"
+    <include
+        android:id="@+id/counter"
+        layout="@layout/view_counter"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:text="-"
-            android:textSize="22sp"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:id="@+id/decrement"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:text="0"
-            android:id="@+id/number"
-            android:textSize="22sp"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:text="+"
-            android:textSize="22sp"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:id="@+id/increment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
