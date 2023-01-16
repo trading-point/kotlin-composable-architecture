@@ -8,29 +8,34 @@ ext {
     //region Libraries
     libraries = [:]
 
-    // https://github.com/JetBrains/kotlin/blob/1.4.20/ChangeLog.md
+    // https://github.com/JetBrains/kotlin/blob/master/ChangeLog.md#1720
     libraries.kotlin = [:]
-    libraries.kotlin.version = '1.5.31'
-    libraries.kotlin.jdk = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${libraries.kotlin.version}"
+    libraries.kotlin.version = '1.7.20'
+    libraries.kotlin.jdk = "org.jetbrains.kotlin:kotlin-stdlib:${libraries.kotlin.version}"
 
     libraries.rx = [:]
 
-    // https://github.com/ReactiveX/RxJava/releases/tag/v3.1.3
-    libraries.rx.java = "io.reactivex.rxjava3:rxjava:3.1.3"
+    // https://github.com/ReactiveX/RxJava/releases/tag/v3.1.5
+    libraries.rx.java = "io.reactivex.rxjava3:rxjava:3.1.5"
 
-    // https://github.com/junit-team/junit4/releases/tag/r4.13.1
-    libraries.junit = "junit:junit:4.13.1"
+    // https://github.com/junit-team/junit4/releases/tag/r4.13.2
+    libraries.junit = "junit:junit:4.13.2"
+
+    // https://detekt.dev/changelog/#1220---2022-11-20
+    libraries.detekt = [:]
+    libraries.detekt.version = '1.22.0'
+    libraries.detekt.formatting = "io.gitlab.arturbosch.detekt:detekt-formatting:${libraries.detekt.version}"
     //endregion
 
     //region Classpaths
     classpaths = [:]
-    // https://developer.android.com/studio/releases/gradle-plugin#7-0-0
-    classpaths.gradle = "com.android.tools.build:gradle:7.0.2"
+    // https://developer.android.com/studio/releases/gradle-plugin#7-1-2
+    classpaths.gradle = "com.android.tools.build:gradle:7.1.2"
     classpaths.kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libraries.kotlin.version}"
-    // https://github.com/ben-manes/gradle-versions-plugin/releases/tag/v0.38.0
-    classpaths.versions = "com.github.ben-manes:gradle-versions-plugin:0.38.0"
-    // https://detekt.github.io/detekt/changelog.html#1181---2021-08-30
-    classpaths.detekt = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:1.18.1"
+    // https://github.com/ben-manes/gradle-versions-plugin/releases/tag/v0.44.0
+    classpaths.versions = "com.github.ben-manes:gradle-versions-plugin:0.44.0"
+    // https://detekt.dev/changelog/#1220---2022-11-20
+    classpaths.detekt = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin:${libraries.detekt.version}"
     //endregion
 
     //region Repositories
