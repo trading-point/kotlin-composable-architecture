@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
 import com.xm.examples.cases.EffectsBasicsAction.DecrementButtonTapped
 import com.xm.examples.cases.EffectsBasicsAction.IncrementButtonTapped
@@ -57,8 +55,6 @@ class EffectsBasic : Fragment() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    private val viewModel: EffectsBasicViewModel by viewModels()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -75,8 +71,6 @@ class EffectsBasic : Fragment() {
             setDisplayHomeAsUpEnabled(true)
             title = resources.getString(R.string.effects_basics_toolbar_title)
         }
-
-        val viewStore = viewModel.viewStore
 
         viewStore.states
             .subscribe {
@@ -101,17 +95,17 @@ class EffectsBasic : Fragment() {
         compositeDisposable.clear()
         super.onDestroyView()
     }
-}
 
-class EffectsBasicViewModel : ViewModel() {
+    companion object {
+        private val store = Store(
+            initialState = EffectsBasicsState(),
+            reducer = effectsBasicReducer,
+            environment = EffectsBasicsEnvironment(FactClientLive(), BaseSchedulerProvider())
+        )
 
-    private val store = Store(
-        initialState = EffectsBasicsState(),
-        reducer = effectsBasicReducer,
-        environment = EffectsBasicsEnvironment(FactClientLive(), BaseSchedulerProvider())
-    )
-
-    val viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction> = store.view()
+        // ViewStore could be provided by a ViewModel or directly injected via a DI framework
+        val viewStore: ViewStore<EffectsBasicsState, EffectsBasicsAction> = store.view()
+    }
 }
 
 data class EffectsBasicsState(

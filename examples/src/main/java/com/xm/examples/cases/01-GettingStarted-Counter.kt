@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import com.xm.examples.MainActivity
 import com.xm.examples.cases.CounterAction.DecrementButtonTapped
 import com.xm.examples.cases.CounterAction.IncrementButtonTapped
@@ -33,8 +31,6 @@ class GettingStartedCounter : Fragment() {
 
     private var compositeDisposable = CompositeDisposable()
 
-    private val viewModel: CounterViewModel by viewModels()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -52,8 +48,6 @@ class GettingStartedCounter : Fragment() {
             title = resources.getString(R.string.getting_started_counter_toolbar_title)
         }
 
-        val viewStore = viewModel.viewStore
-
         viewStore.states
             .subscribe {
                 binding.counter.number.text = it.count.toString()
@@ -68,17 +62,17 @@ class GettingStartedCounter : Fragment() {
         compositeDisposable.clear()
         super.onDestroyView()
     }
-}
 
-class CounterViewModel : ViewModel() {
+    companion object {
+        private val store = Store(
+            initialState = CounterState(),
+            reducer = counterReducer,
+            environment = CounterEnvironment
+        )
 
-    private val store = Store(
-        initialState = CounterState(),
-        reducer = counterReducer,
-        environment = CounterEnvironment
-    )
-
-    val viewStore: ViewStore<CounterState, CounterAction> = store.view()
+        // ViewStore could be provided by a ViewModel or directly injected via a DI framework
+        val viewStore: ViewStore<CounterState, CounterAction> = store.view()
+    }
 }
 
 data class CounterState(val count: Int = 0)
