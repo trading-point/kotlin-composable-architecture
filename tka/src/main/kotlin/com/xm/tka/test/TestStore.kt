@@ -4,10 +4,7 @@ package com.xm.tka.test
 
 import com.xm.tka.Getter
 import com.xm.tka.Reducer
-import com.xm.tka.test.TestStore.Step.Type.Environment
-import com.xm.tka.test.TestStore.Step.Type.Receive
-import com.xm.tka.test.TestStore.Step.Type.Send
-import io.reactivex.rxjava3.disposables.Disposable
+import com.xm.tka.Store
 import java.util.LinkedList
 
 /**
@@ -39,7 +36,7 @@ import java.util.LinkedList
  *
  *   Source: https://github.com/pointfreeco/swift-composable-architecture/blob/main/Sources/ComposableArchitecture/TestSupport/TestStore.swift
  */
-class TestStore<STATE, LOCAL_STATE, ACTION : Any, LOCAL_ACTION : Any, ENVIRONMENT> private constructor(
+class TestStore<STATE : Any, LOCAL_STATE : Any, ACTION : Any, LOCAL_ACTION : Any, ENVIRONMENT : Any> private constructor(
     initialState: STATE,
     private val reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
     private val environment: ENVIRONMENT,
@@ -48,86 +45,131 @@ class TestStore<STATE, LOCAL_STATE, ACTION : Any, LOCAL_ACTION : Any, ENVIRONMEN
     private val printer: Printer
 ) {
 
-    private var state: STATE = initialState
+    private sealed interface TestAction<out ACTION : Any, out LOCAL_ACTION : Any> {
+        data class Send<LOCAL_ACTION : Any>(val localAction: LOCAL_ACTION) :
+            TestAction<Nothing, LOCAL_ACTION>
+
+        data class Receive<ACTION : Any>(val action: ACTION) : TestAction<ACTION, Nothing>
+    }
+
+    private var snapshotState: STATE = initialState
+    private val receivedActions = LinkedList<Pair<ACTION, STATE>>()
+    private var id: ULong = ULong.MIN_VALUE
+    private val longLivingEffects = mutableListOf<ULong>()
+
+    private val store = Store<STATE, TestAction<ACTION, LOCAL_ACTION>, Unit>(
+        initialState,
+        Reducer { state, testAction, _ ->
+            val (newState, newEffect) = when (testAction) {
+                is TestAction.Send -> reducer.reduce(
+                    state,
+                    fromLocalAction(testAction.localAction),
+                    environment
+                ).also { (newState, _) -> snapshotState = newState }
+                is TestAction.Receive -> reducer.reduce(
+                    state,
+                    testAction.action,
+                    environment
+                ).also { (newState, _) -> receivedActions.add(testAction.action to newState) }
+            }
+            val effect = id.inc()
+            newState + newEffect
+                .doOnSubscribe { longLivingEffects.add(effect) }
+                .doOnTerminate { longLivingEffects.remove(effect) }
+                .doOnDispose { longLivingEffects.remove(effect) }
+                .map { TestAction.Receive(it) }
+        },
+        Unit
+    )
 
     /**
      * Asserts against a script of actions.
      */
-    @Suppress("LongMethod")
+    @Deprecated("`Step`s are deprecated, use distinct send/receive methods", ReplaceWith("assert { steps }"))
     fun assert(vararg steps: Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT>) {
-        val receivedActions = LinkedList<ACTION>()
-
-        val disposables = mutableListOf<Disposable>()
-
-        val runReducer: (ACTION) -> Unit = { action ->
-            val (newState, effect) = reducer.reduce(state, action, environment)
-            state = newState
-            var isComplete = false
-            var disposable: Disposable? = null
-            disposable = effect.subscribe(
-                {
-                    receivedActions.add(it)
-                },
-                { error ->
-                    printer.print("TKA: Store: effectDisposable", error)
-                    isComplete = true
-                    disposables.removeAll { it == disposable }
-                },
-                {
-                    isComplete = true
-                    disposables.removeAll { it == disposable }
-                }
-            )
-            if (isComplete.not()) disposables.add(disposable)
-        }
-
         steps.forEachIndexed { index, step ->
             when (val type = step.type) {
-                is Send -> {
-                    assert(receivedActions.none()) {
-                        """
-Must handle ${receivedActions.size} received action${if (receivedActions.none()) "" else "S"}
-before sending an action.
-Unhandled actions: $receivedActions
-                        """
-                    }
-                    val initialState = toLocalState(state)
-                    runReducer(fromLocalAction(type.localAction))
-                    val actualState = toLocalState(state)
-                    assertState(index + 1, type, type.update(initialState), actualState)
+                is Step.Type.Send -> {
+                    send(index + 1 to type, type.localAction, type.update)
                 }
-                is Receive -> {
-                    assert(receivedActions.any()) {
-                        """
-Expected to receive ${type.expectedAction}, but received none.
-                        """
-                    }
-                    val receivedAction = receivedActions.remove()
-                    assert(type.expectedAction == receivedAction) {
-                        """
-Received unexpected action
-    Expected: ${type.expectedAction}
-    Actual:   $receivedAction.
-                        """
-                    }
-                    val initialState = toLocalState(state)
-                    runReducer(receivedAction)
-                    val actualState = toLocalState(state)
-                    assertState(index + 1, type, type.update(initialState), actualState)
+                is Step.Type.Receive -> {
+                    receive(index + 1 to type, type.expectedAction, type.update)
                 }
-                is Environment -> {
-                    assert(receivedActions.none()) {
-                        """
-Must handle ${receivedActions.size} received action${if (receivedActions.none()) "" else "s"}
-before sending an action.
-    Unhandled actions: $receivedActions
-                        """
-                    }
+                is Step.Type.Environment -> {
                     type.work(environment)
                 }
             }
         }
+        completed()
+    }
 
+    /**
+     * Asserts against a script of actions and verify
+     */
+    fun assert(steps: TestStore<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT>.() -> Unit) {
+        apply(steps).completed()
+    }
+
+    /**
+     * Assert a sent action
+     */
+    fun send(
+        action: LOCAL_ACTION,
+        update: (LOCAL_STATE) -> LOCAL_STATE = { it }
+    ) = send(null, action, update)
+
+    private fun send(
+        step: Pair<Int, Step.Type.Send<LOCAL_STATE, LOCAL_ACTION>>? = null,
+        action: LOCAL_ACTION,
+        update: (LOCAL_STATE) -> LOCAL_STATE
+    ) {
+        assertActions()
+        val expectedState = toLocalState(snapshotState)
+        store
+            .scope<LOCAL_STATE, LOCAL_ACTION>(
+                toLocalState = { toLocalState(it) },
+                fromLocalAction = { TestAction.Send(it) }
+            )
+            .send(action)
+        assertState(step, update(expectedState), toLocalState(snapshotState))
+    }
+
+    /**
+     * Assert a received action
+     */
+    fun receive(
+        expectedAction: ACTION,
+        update: (LOCAL_STATE) -> LOCAL_STATE = { it }
+    ) = receive(null, expectedAction, update)
+
+    private fun receive(
+        step: Pair<Int, Step.Type.Receive<LOCAL_STATE, ACTION>>? = null,
+        expectedAction: ACTION,
+        update: (LOCAL_STATE) -> LOCAL_STATE
+    ) {
+        assert(receivedActions.any()) {
+            """
+Expected to receive ${expectedAction}, but received none.
+                        """
+        }
+        val (receivedAction, state) = receivedActions.remove()
+        assert(expectedAction == receivedAction) {
+            """
+Received unexpected action
+    Expected: $expectedAction
+    Actual:   $receivedAction.
+                        """
+        }
+        val expectedState = toLocalState(snapshotState)
+        val actualState = toLocalState(state)
+        assertState(step, update(expectedState), actualState)
+        snapshotState = state
+    }
+
+    /**
+     * Assert that all store operations are complete
+     */
+    fun completed() {
         assert(receivedActions.none()) {
             """
 Received ${receivedActions.size} unexpected action${if (receivedActions.none()) "" else "s"}.
@@ -135,7 +177,7 @@ Received ${receivedActions.size} unexpected action${if (receivedActions.none()) 
             """
         }
 
-        assert(disposables.none()) {
+        assert(longLivingEffects.none()) {
             """
 Some effects are still running. All effects must complete by the end of the assertion.
 This can happen for a few reasons:
@@ -150,23 +192,35 @@ This can happen for a few reasons:
     }
 
     private fun assertState(
-        step: Int,
-        type: Step.Type<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT>,
+        step: Pair<Int, Step.Type<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT>>? = null,
         expected: LOCAL_STATE,
         actual: LOCAL_STATE
     ) {
         assert(expected == actual) {
             """
-State change on step $step: $type does not match expectation
+State change ${step?.let { (index, type) -> "on step $index: $type" } ?: ""} does not match expectation
     Expected: $expected
     Actual:   $actual
             """.trim()
         }
     }
 
+    private fun assertActions(
+        index: Int? = null
+    ) {
+        assert(receivedActions.none()) {
+            """
+Must handle ${receivedActions.size} received action${if (receivedActions.none()) "" else "s"}
+before sending an action ${index?.let { "on step $index" } ?: ""}
+Unhandled actions: $receivedActions
+                        """
+        }
+    }
+
     /**
      * A single step of a [TestStore] assertion.
      */
+    @Deprecated("`Step`s are deprecated, use distinct send/receive methods")
     class Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> private constructor(
         internal val type: Type<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT>
     ) {
@@ -197,11 +251,12 @@ State change on step $step: $type does not match expectation
              * @return A step that describes an action sent to a store and asserts against how the
              * store's state is expected to change.
              */
+            @Deprecated("`Step`s are deprecated, use distinct send/receive methods")
             fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> send(
                 action: LOCAL_ACTION,
                 update: (LOCAL_STATE) -> LOCAL_STATE = { it }
             ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
-                Step(Send(action, update))
+                Step(Type.Send(action, update))
 
             /**
              * A step that describes an action received by an effect and asserts against how the store's
@@ -212,23 +267,12 @@ State change on step $step: $type does not match expectation
              * @return A step that describes an action received by an effect and asserts against how
              * the store's state is expected to change.
              */
+            @Deprecated("`Step`s are deprecated, use distinct send/receive methods")
             fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> receive(
                 action: ACTION,
                 update: (LOCAL_STATE) -> LOCAL_STATE = { it }
             ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
-                Step(Receive(action, update))
-
-            /**
-             * A step that updates a test store's environment.
-             *
-             * @param update: A function that updates the test store's environment for subsequent
-             * steps.
-             * @return: A step that updates a test store's environment.
-             */
-            fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> environment(
-                update: (ENVIRONMENT) -> ENVIRONMENT
-            ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
-                Step(Environment(update))
+                Step(Type.Receive(action, update))
 
             /**
              * A step that captures some work to be done between assertions
@@ -236,10 +280,11 @@ State change on step $step: $type does not match expectation
              * @param work: A function that is called between steps.
              * @return A step that captures some work to be done between assertions.
              */
+            @Deprecated("`Step`s are deprecated, use distinct send/receive methods")
             fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> `do`(
                 work: () -> Unit
             ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
-                Step(Environment { work(); it })
+                Step(Type.Environment { work(); it })
         }
     }
 
@@ -251,7 +296,7 @@ State change on step $step: $type does not match expectation
          * @param reducer: A reducer.
          * @param environment: The environment to start the test from.
          */
-        operator fun <STATE, ACTION : Any, ENVIRONMENT> invoke(
+        operator fun <STATE : Any, ACTION : Any, ENVIRONMENT : Any> invoke(
             initialState: STATE,
             reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
             environment: ENVIRONMENT,

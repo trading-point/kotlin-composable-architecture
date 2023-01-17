@@ -5,8 +5,6 @@ import com.xm.tka.Effects.none
 import com.xm.tka.Reducer.Companion.combine
 import com.xm.tka.ReducerTest.Action.Increment
 import com.xm.tka.test.TestStore
-import com.xm.tka.test.TestStore.Step.Companion.`do`
-import com.xm.tka.test.TestStore.Step.Companion.send
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.TestScheduler
 import java.util.concurrent.TimeUnit.SECONDS
@@ -52,16 +50,16 @@ class ReducerTest {
             scheduler
         )
 
-        store.assert(
-            send(Increment) { 2 },
+        store.assert {
+            send(Increment) { 2 }
             // Waiting a second causes the fast effect to fire.
-            `do` { scheduler.advanceTimeBy(1, SECONDS) },
-            `do` { assertEquals(42, fastValue) },
+            scheduler.advanceTimeBy(1, SECONDS)
+            assertEquals(42, fastValue)
             // Waiting one more second causes the slow effect to fire. This proves that the effects
             // are merged together, as opposed to concatenated.
-            `do` { scheduler.advanceTimeBy(1, SECONDS) },
-            `do` { assertEquals(1729, slowValue) }
-        )
+            scheduler.advanceTimeBy(1, SECONDS)
+            assertEquals(1729, slowValue)
+        }
     }
 
     @Test
@@ -82,9 +80,9 @@ class ReducerTest {
             Unit
         )
 
-        store.assert(
+        store.assert {
             send(Increment) { 2 }
-        )
+        }
 
         assertTrue(childEffectExecuted)
         assertTrue(mainEffectExecuted)

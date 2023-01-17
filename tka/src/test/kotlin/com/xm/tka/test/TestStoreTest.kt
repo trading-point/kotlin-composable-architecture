@@ -3,8 +3,6 @@ package com.xm.tka.test
 import com.xm.tka.Effects.just
 import com.xm.tka.Effects.none
 import com.xm.tka.Reducer
-import com.xm.tka.test.TestStore.Step.Companion.receive
-import com.xm.tka.test.TestStore.Step.Companion.send
 import com.xm.tka.test.TestStoreTest.Action.Change
 import com.xm.tka.test.TestStoreTest.Action.Result
 import org.junit.Test
@@ -14,7 +12,7 @@ private const val CHANGED_STATE = 1
 
 class TestStoreTest {
 
-    sealed class Action {
+    private sealed class Action {
         object Change : Action()
         object Result : Action()
     }
@@ -30,11 +28,11 @@ class TestStoreTest {
             Unit
         )
 
-        store.assert(
+        store.assert {
             send(Change) {
                 CHANGED_STATE
             }
-        )
+        }
     }
 
     @Test(expected = AssertionError::class)
@@ -46,11 +44,11 @@ class TestStoreTest {
             Unit
         )
 
-        store.assert(
+        store.assert {
             send(Change) {
                 INITIAL_STATE
             }
-        )
+        }
     }
 
     @Test
@@ -67,10 +65,10 @@ class TestStoreTest {
             Unit
         )
 
-        store.assert(
-            send(Change),
+        store.assert {
+            send(Change)
             receive(Result)
-        )
+        }
     }
 
     @Test
@@ -87,12 +85,12 @@ class TestStoreTest {
             Unit
         )
 
-        store.assert(
-            send(Change),
+        store.assert {
+            send(Change)
             receive(Result) {
                 it.copy(value = CHANGED_STATE)
             }
-        )
+        }
     }
 
     @Test(expected = AssertionError::class)
@@ -109,11 +107,11 @@ class TestStoreTest {
             Unit
         )
 
-        store.assert(
-            send(Change),
+        store.assert {
+            send(Change)
             receive(Result) {
                 it.copy(value = INITIAL_STATE)
             }
-        )
+        }
     }
 }

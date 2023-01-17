@@ -12,9 +12,6 @@ import com.xm.tka.Effects.just
 import com.xm.tka.Effects.merge
 import com.xm.tka.Effects.none
 import com.xm.tka.test.TestStore
-import com.xm.tka.test.TestStore.Step.Companion.`do`
-import com.xm.tka.test.TestStore.Step.Companion.receive
-import com.xm.tka.test.TestStore.Step.Companion.send
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.TestScheduler
 import io.reactivex.rxjava3.subjects.PublishSubject
@@ -48,22 +45,22 @@ class ComposableArchitectureTests {
         val scheduler = TestScheduler()
         val store = TestStore(2, counterReducer, scheduler)
 
-        store.assert(
-            send(IncrAndSquareLater),
-            `do` { scheduler.advanceTimeBy(1, SECONDS) },
-            receive(SquareNow) { 4 },
-            `do` { scheduler.advanceTimeBy(1, SECONDS) },
-            receive(IncrNow) { 5 },
+        store.assert {
+            send(IncrAndSquareLater)
+            scheduler.advanceTimeBy(1, SECONDS)
+            receive(SquareNow) { 4 }
+            scheduler.advanceTimeBy(1, SECONDS)
+            receive(IncrNow) { 5 }
             receive(SquareNow) { 25 }
-        )
+        }
 
-        store.assert(
-            send(IncrAndSquareLater),
-            `do` { scheduler.advanceTimeBy(2, SECONDS) },
-            receive(SquareNow) { 625 },
-            receive(IncrNow) { 626 },
+        store.assert {
+            send(IncrAndSquareLater)
+            scheduler.advanceTimeBy(2, SECONDS)
+            receive(SquareNow) { 625 }
+            receive(IncrNow) { 626 }
             receive(SquareNow) { 391876 }
-        )
+        }
     }
 
     @Test
@@ -125,13 +122,13 @@ class ComposableArchitectureTests {
             }
         )
 
-        store.assert(
-            send(Start),
-            send(Incr) { 1 },
-            `do` { subject.onNext(Unit) },
-            receive(Incr) { 2 },
+        store.assert {
+            send(Start)
+            send(Incr) { 1 }
+            subject.onNext(Unit)
+            receive(Incr) { 2 }
             send(End)
-        )
+        }
     }
 
     sealed class Action2 {
@@ -173,16 +170,16 @@ class ComposableArchitectureTests {
             }
         )
 
-        store.assert(
-            send(Action2.Incr) { 1 },
-            `do` { scheduler.triggerActions() },
+        store.assert {
+            send(Action2.Incr) { 1 }
+            scheduler.triggerActions()
             receive(Action2.Response(1)) { 1 }
-        )
+        }
 
-        store.assert(
-            send(Action2.Incr) { 2 },
-            send(Action2.Cancel),
-            `do` { scheduler.triggerActions() }
-        )
+        store.assert {
+            send(Action2.Incr) { 2 }
+            send(Action2.Cancel)
+            scheduler.triggerActions()
+        }
     }
 }
