@@ -58,7 +58,6 @@ class Store<STATE : Any, ACTION : Any> private constructor(
 
         while (synchronousActionsToSend.any() || bufferedActions.any()) {
             with(synchronousActionsToSend.poll() ?: bufferedActions.poll() ?: continue) {
-
                 isSending = true
                 val (newState, effect) = try {
                     reducer(currentState, this)
@@ -73,8 +72,11 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                 var isProcessingEffects = true
                 val effectDisposable = effect.subscribe(
                     {
-                        if (isProcessingEffects) synchronousActionsToSend.add(it)
-                        else send(it)
+                        if (isProcessingEffects) {
+                            synchronousActionsToSend.add(it)
+                        } else {
+                            send(it)
+                        }
                     },
                     {
                         printer.print("TKA: Store: effectDisposable", it)
@@ -138,9 +140,8 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     fun <LOCAL_STATE : Any> scope(
         toLocalState: Getter<STATE, LOCAL_STATE>
     ): Store<LOCAL_STATE, ACTION> = scope(
-        toLocalState,
-        { it }
-    )
+        toLocalState
+    ) { it }
 
     /**
      * Scopes the store to an [Observable] of stores of more local state and local actions
@@ -153,7 +154,6 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         toLocalState: Getter<Observable<STATE>, Observable<LOCAL_STATE>>,
         fromLocalAction: Getter<LOCAL_ACTION, ACTION>
     ): Observable<Store<LOCAL_STATE, LOCAL_ACTION>> {
-
         val extractLocalState: (STATE) -> LOCAL_STATE? = {
             toLocalState(Observable.just(it)).runCatching { blockingFirst() }.getOrNull()
         }
