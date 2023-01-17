@@ -14,9 +14,6 @@ import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
 import com.xm.tka.Effects
 import com.xm.tka.test.TestStore
-import com.xm.tka.test.TestStore.Step.Companion.`do`
-import com.xm.tka.test.TestStore.Step.Companion.receive
-import com.xm.tka.test.TestStore.Step.Companion.send
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.schedulers.TestScheduler
@@ -49,23 +46,23 @@ class EffectsCancellationTest {
         `when`(factClient.execute("1"))
             .thenReturn(Single.just(Result.success(response)))
 
-        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert(
+        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert {
             send(StepperIncrement(1)) {
                 it.copy(2)
-            },
+            }
             send(StepperDecrement(2)) {
                 it.copy(1)
-            },
+            }
             send(TriviaButtonTapped) {
                 it.copy(isTriviaRequestInFlight = true)
-            },
+            }
             receive(TriviaResponse(Result.success(response))) {
                 it.copy(
                     currentTrivia = response,
                     isTriviaRequestInFlight = false
                 )
             }
-        )
+        }
     }
 
     @Test
@@ -87,15 +84,15 @@ class EffectsCancellationTest {
         `when`(factClient.execute(anyString()))
             .thenReturn(Single.just(Result.failure(exception)))
 
-        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert(
+        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert {
             send(TriviaButtonTapped) {
                 it.copy(isTriviaRequestInFlight = true)
-            },
+            }
             receive(TriviaResponse(Result.failure(exception))) {
                 it.copy(isTriviaRequestInFlight = false)
-            },
-            `do` { Effects.cancel<EffectsCancellationAction>(TriviaRequestId) }
-        )
+            }
+            Effects.cancel<EffectsCancellationAction>(TriviaRequestId)
+        }
     }
 
     /**
@@ -126,15 +123,15 @@ class EffectsCancellationTest {
         `when`(factClient.execute(anyString()))
             .thenReturn(Single.just(Result.success(response)))
 
-        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert(
+        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert {
             send(TriviaButtonTapped) {
                 it.copy(isTriviaRequestInFlight = true)
-            },
+            }
             send(CancelButtonTapped) {
                 it.copy(isTriviaRequestInFlight = false)
-            },
-            `do` { Effects.cancel<EffectsCancellationAction>(TriviaRequestId) }
-        )
+            }
+            Effects.cancel<EffectsCancellationAction>(TriviaRequestId)
+        }
     }
 
     @Test
@@ -155,14 +152,14 @@ class EffectsCancellationTest {
         `when`(factClient.execute(anyString()))
             .thenReturn(Single.just(Result.success(response)))
 
-        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert(
+        TestStore(EffectCancellationState(), effectsCancellationReducer, env).assert {
             send(TriviaButtonTapped) {
                 it.copy(isTriviaRequestInFlight = true)
-            },
+            }
             send(StepperIncrement(1)) {
                 it.copy(count = 2, isTriviaRequestInFlight = false)
-            },
-            `do` { Effects.cancel<EffectsCancellationAction>(TriviaRequestId) },
-        )
+            }
+            Effects.cancel<EffectsCancellationAction>(TriviaRequestId)
+        }
     }
 }

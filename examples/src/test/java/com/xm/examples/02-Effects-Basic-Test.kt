@@ -13,9 +13,6 @@ import com.xm.examples.utils.BaseSchedulerProvider
 import com.xm.examples.utils.FactClientLive
 import com.xm.tka.Effects
 import com.xm.tka.test.TestStore
-import com.xm.tka.test.TestStore.Step.Companion.`do`
-import com.xm.tka.test.TestStore.Step.Companion.receive
-import com.xm.tka.test.TestStore.Step.Companion.send
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.plugins.RxJavaPlugins
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -43,18 +40,18 @@ class EffectsBasicTest {
 
         RxJavaPlugins.setComputationSchedulerHandler { testScheduler }
 
-        TestStore(EffectsBasicsState(count = 0), effectsBasicReducer, env).assert(
+        TestStore(EffectsBasicsState(count = 0), effectsBasicReducer, env).assert {
             send(IncrementButtonTapped) {
                 it.copy(1)
-            },
+            }
             send(DecrementButtonTapped) {
                 it.copy(count = 0, numberFact = null)
-            },
-            `do` { testScheduler.advanceTimeBy(1, TimeUnit.SECONDS) },
+            }
+            testScheduler.advanceTimeBy(1, TimeUnit.SECONDS)
             receive(IncrementButtonTapped) {
                 it.copy(1)
             }
-        )
+        }
     }
 
     @Test
@@ -78,21 +75,21 @@ class EffectsBasicTest {
         `when`(factClient.execute("1"))
             .thenReturn(Single.just(response))
 
-        TestStore(EffectsBasicsState(count = 0), effectsBasicReducer, env).assert(
+        TestStore(EffectsBasicsState(count = 0), effectsBasicReducer, env).assert {
             send(IncrementButtonTapped) {
                 it.copy(1)
-            },
+            }
             send(NumberFactButtonTapped) {
                 it.copy(isNumberFactRequestInFlight = true)
-            },
+            }
             receive(NumberFactResponse(response)) {
                 it.copy(
                     isNumberFactRequestInFlight = false,
                     numberFact = "1 is a good number Brent"
                 )
-            },
-            `do` { Effects.cancel<EffectsBasicsAction>(FactId) }
-        )
+            }
+            Effects.cancel<EffectsBasicsAction>(FactId)
+        }
     }
 
 }

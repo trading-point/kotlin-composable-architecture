@@ -79,7 +79,7 @@ class EffectCancellationTests {
         var value: Int? = null
 
         val test = Observable.just(1)
-            .delay(150, MILLISECONDS)
+            .delay(100, MILLISECONDS)
             .cancellable(id)
             .doOnNext { value = it }
             .test()
@@ -89,7 +89,7 @@ class EffectCancellationTests {
 
         Schedulers.computation().scheduleDirect(
             { Effects.cancel<Int>(id).subscribe().also { compositeDisposable.add(it) } },
-            5,
+            10,
             MILLISECONDS
         )
 
@@ -128,6 +128,16 @@ class EffectCancellationTests {
         test.assertComplete()
             .assertNoErrors()
             .assertNoValues()
+    }
+
+    @Test
+    fun testCancellablesCleanUp_OnComplete() {
+        Observable.just(1)
+            .cancellable(id)
+            .subscribe()
+            .also { compositeDisposable.add(it) }
+
+        assertEquals(0, cancellationDisposables.size)
     }
 
     @Test
@@ -205,7 +215,7 @@ class EffectCancellationTests {
                         .cancellable(id),
                     Observable.empty<Int>()
                         .delay((1..100L).random(), MILLISECONDS, schedulers.random())
-                        .flatMap { Effects.cancel<Int>(id) }
+                        .flatMap { Effects.cancel(id) }
                 )
             }.toTypedArray()
         ).test()
