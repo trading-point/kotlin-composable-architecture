@@ -135,7 +135,6 @@ fun <ACTION : Any> Completable.toEffect(action: ACTION): Effect<ACTION> = this.a
  */
 fun <ACTION : Any> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false): Effect<ACTION> {
     val effect = Observable.defer {
-
         val subject = PublishSubject.create<ACTION>()
         val values = mutableListOf<ACTION>()
         var isCaching = true

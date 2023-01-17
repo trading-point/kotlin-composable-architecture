@@ -39,8 +39,11 @@ interface Printer {
     companion object {
         operator fun invoke(): Printer = object : Printer {
             override fun print(message: String, error: Throwable?) {
-                if (error == null) println(message)
-                else System.err.println("$message: $error")
+                if (error == null) {
+                    println(message)
+                } else {
+                    System.err.println("$message: $error")
+                }
             }
         }
     }

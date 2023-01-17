@@ -149,7 +149,7 @@ class TestStore<STATE : Any, LOCAL_STATE : Any, ACTION : Any, LOCAL_ACTION : Any
     ) {
         assert(receivedActions.any()) {
             """
-Expected to receive ${expectedAction}, but received none.
+Expected to receive $expectedAction, but received none.
                         """
         }
         val (receivedAction, state) = receivedActions.remove()
