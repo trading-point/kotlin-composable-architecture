@@ -2,19 +2,19 @@
 
 package com.xm.tka
 
-import com.xm.tka.Effects.cancel
 import com.xm.tka.Effects.just
 import com.xm.tka.Effects.none
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Maybe
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Observable.concat
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * The `Effect` type encapsulates a unit of work that can be run in the outside world, and can feed
@@ -64,7 +64,8 @@ object Effects {
      * This can be helpful for converting APIs that are callback-based into ones that deal with
      * `Effect`s.
      */
-    fun <ACTION : Any> future(work: () -> ACTION): Effect<ACTION> = Maybe.fromCallable(work).toEffect()
+    fun <ACTION : Any> future(work: () -> ACTION): Effect<ACTION> =
+        Maybe.fromCallable(work).toEffect()
 
     /**
      * Creates an effect that executes some work in the real world that doesn't need to feed data
@@ -86,6 +87,16 @@ object Effects {
         Observable.merge(effects.toList())
 
     /**
+     * Concatenates a variadic list of effects together into a single effect, which runs the effects
+     * one after the other
+     *
+     * @param effects: A list of effects.
+     * @return A new effect
+     */
+    fun <ACTION : Any> concatenate(vararg effects: Effect<ACTION>): Effect<ACTION> =
+        Observable.concat(effects.toList())
+
+    /**
      * An effect that will cancel any currently in-flight effect with the given identifier.
      *
      * @param id: An effect identifier.
@@ -94,6 +105,19 @@ object Effects {
      */
     fun <ACTION : Any> cancel(id: Any): Effect<ACTION> = fireAndForget {
         cancellationDisposables[id]?.forEach { it.dispose() }
+    }
+
+    /**
+     * An effect that will cancel any currently in-flight effects with the given identifier.
+     *
+     * @param ids: The effect identifiers.
+     * @return A new effect that will cancel any currently in-flight effects with the given
+     * identifiers.
+     */
+    fun <ACTION : Any> cancel(vararg ids: Any): Effect<ACTION> = fireAndForget {
+        ids.forEach { id ->
+            cancellationDisposables[id]?.forEach { it.dispose() }
+        }
     }
 }
 
@@ -133,38 +157,48 @@ fun <ACTION : Any> Completable.toEffect(action: ACTION): Effect<ACTION> = this.a
  * canceled before starting this new one.
  * @return A new effect that is capable of being canceled by an identifier.
  */
-fun <ACTION : Any> Effect<ACTION>.cancellable(id: Any, cancelInFlight: Boolean = false): Effect<ACTION> {
+fun <ACTION : Any> Effect<ACTION>.cancellable(
+    id: Any,
+    cancelInFlight: Boolean = false
+): Effect<ACTION> {
     val effect = Observable.defer {
-        val subject = PublishSubject.create<ACTION>()
-        val values = mutableListOf<ACTION>()
-        var isCaching = true
-        val disposable = this
-            .doOnNext { if (isCaching) values.add(it) }
-            .subscribe(subject::onNext, subject::onError, subject::onComplete)
+        cancellablesLock.withLock {
+            if (cancelInFlight) cancellationDisposables[id]?.forEach { it.dispose() }
 
-        var cancellationDisposable: Disposable? = null
-        cancellationDisposable = Disposable.fromAction {
-            subject.onComplete()
-            disposable.dispose()
-            cancellationDisposables[id]
-                ?.apply {
-                    remove(cancellationDisposable)
+            val subject = PublishSubject.create<ACTION>()
+            val values = mutableListOf<ACTION>()
+            var isCaching = true
+            val disposable = this
+                .doOnNext { if (isCaching) values.add(it) }
+                .subscribe(subject::onNext, subject::onError, subject::onComplete)
+
+            var cancellationDisposable: Disposable? = null
+            cancellationDisposable = Disposable.fromAction {
+                cancellablesLock.withLock {
+                    subject.onComplete()
+                    disposable.dispose()
+                    cancellationDisposables[id]
+                        ?.apply {
+                            remove(cancellationDisposable)
+                        }
+                        ?.ifEmpty {
+                            cancellationDisposables.remove(id)
+                        }
                 }
-                ?.ifEmpty {
-                    cancellationDisposables.remove(id)
-                }
+            }
+
+            cancellationDisposables.getOrPut(id) { ConcurrentLinkedDeque() }.add(cancellationDisposable)
+
+            Observable.fromIterable(values)
+                .concatWith(subject)
+                .doOnError { cancellationDisposable.dispose() }
+                .doOnComplete { cancellationDisposable.dispose() }
+                .doOnSubscribe { isCaching = false }
+                .doOnDispose { cancellationDisposable.dispose() }
         }
-
-        cancellationDisposables.getOrPut(id) { ConcurrentLinkedDeque() }.add(cancellationDisposable)
-
-        Observable.fromIterable(values)
-            .concatWith(subject)
-            .doOnError { cancellationDisposable.dispose() }
-            .doOnComplete { cancellationDisposable.dispose() }
-            .doOnSubscribe { isCaching = false }
-            .doOnDispose { cancellationDisposable.dispose() }
     }
-    return if (cancelInFlight) concat(cancel(id), effect) else effect
+    return effect
 }
 
 internal val cancellationDisposables = ConcurrentHashMap<Any, ConcurrentLinkedDeque<Disposable>>()
+private val cancellablesLock = ReentrantLock()
