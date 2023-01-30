@@ -70,8 +70,28 @@ interface Reducer<STATE, ACTION : Any, ENVIRONMENT> {
                         // return the update global state along with the global actions
                         .let { effect -> toLocalState.set(state, localState) + effect }
                 }
-                ?: state + none()
+                ?: (state + none())
         }
+
+    /**
+     * Transforms a reducer that works on local state, action and environment into one that works on
+     * global state and action (without the need of an environment). It accomplishes this by providing
+     * 2 transformations to the method:
+     *
+     * * A [StateLens] that can get/set a piece of local state from the global state.
+     * * An [ActionPrism] that can extract/embed a local action into a global action.
+     *
+     * This operation is important for breaking down large reducers into small ones. When used with
+     * the `combine` operator you can define many reducers that work on small pieces of domain, and
+     * then _pull them back_ and _combine_ them into one big reducer that works on a large domain.
+     *
+     * @param toLocalState: A [StateLens] that can get/set [STATE] inside [GLOBAL_STATE].
+     * @param toLocalAction: An [ActionPrism] that can extract/embed [ACTION] from GLOBAL_ACTION.
+     */
+    fun <STATE, ACTION : Any, GLOBAL_STATE, GLOBAL_ACTION : Any> Reducer<STATE, ACTION, Unit>.pullback(
+        toLocalState: StateLens<GLOBAL_STATE, STATE>,
+        toLocalAction: ActionPrism<GLOBAL_ACTION, ACTION>
+    ): Reducer<GLOBAL_STATE, GLOBAL_ACTION, Unit> = pullback(toLocalState, toLocalAction) { }
 
     companion object {
 
@@ -162,8 +182,12 @@ interface ReduceContext<STATE, ACTION : Any, ENVIRONMENT> {
     /**
      * Combines a state and an effect into a [Reduced] result
      */
-    operator fun STATE.plus(effect: Effect<ACTION>): Reduced<STATE, ACTION> =
-        Reduced(this, effect)
+    fun reduced(state: STATE, effect: Effect<ACTION>): Reduced<STATE, ACTION>
+
+    /**
+     * Operator to combine a state and an effect into a [Reduced] result
+     */
+    operator fun STATE.plus(effect: Effect<ACTION>): Reduced<STATE, ACTION> = reduced(this, effect)
 
     /**
      * Merges effects into a new one
@@ -177,7 +201,15 @@ interface ReduceContext<STATE, ACTION : Any, ENVIRONMENT> {
          * [ReduceContext] constructor
          */
         operator fun <STATE, ACTION : Any, ENVIRONMENT> invoke(): ReduceContext<STATE, ACTION, ENVIRONMENT> =
-            object : ReduceContext<STATE, ACTION, ENVIRONMENT> {}
+            object : ReduceContext<STATE, ACTION, ENVIRONMENT> {
+                private var reducedHolder: ReducedHolder<STATE, ACTION>? = null
+
+                override fun reduced(state: STATE, effect: Effect<ACTION>): Reduced<STATE, ACTION> =
+                    reducedHolder
+                        ?.apply { update(state, effect) }
+                        ?: ReducedHolder(state, effect)
+                            .also { reducedHolder = it }
+            }
     }
 }
 
@@ -190,7 +222,29 @@ typealias Reduce<STATE, ACTION, ENVIRONMENT> =
 /**
  * The Result of the state reduction along with its side-effects
  */
-typealias Reduced<STATE, ACTION> = Pair<STATE, Effect<ACTION>>
+interface Reduced<out STATE, ACTION : Any> {
+    val state: STATE
+    val effect: Effect<ACTION>
+
+    operator fun component1(): STATE = state
+    operator fun component2(): Effect<ACTION> = effect
+}
+
+/**
+ * Private class to hold the [Reduced] result to minimise object creation
+ */
+internal class ReducedHolder<STATE, ACTION : Any>(state: STATE, effect: Effect<ACTION>) :
+    Reduced<STATE, ACTION> {
+    override var state: STATE = state
+        private set
+    override var effect: Effect<ACTION> = effect
+        private set
+
+    fun update(state: STATE, effect: Effect<ACTION>) {
+        this.state = state
+        this.effect = effect
+    }
+}
 
 /**
  * Combines a reducers into a single one by running each one on the state, and merging
@@ -229,5 +283,5 @@ inline fun <reified STATE, ACTION : Any, ENVIRONMENT> Reducer<STATE, ACTION, ENV
             }
         }
         ?.let { reduce(it, action, environment) }
-        ?: state + none()
+        ?: (state + none())
 }
