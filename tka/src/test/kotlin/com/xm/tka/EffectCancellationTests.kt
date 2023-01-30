@@ -287,4 +287,42 @@ class EffectCancellationTests {
         scheduler.advanceTimeTo(1, SECONDS)
         assertEquals(emptyList<Int>(), expectedOutput)
     }
+
+    @Test
+    fun testNestedMergeCancellation() {
+        Effect.merge(
+            listOf(Effect.just(1, 2).cancellable(1))
+        ).cancellable(2)
+            .test()
+            .also { compositeDisposable.add(it) }
+            .assertValues(1, 2)
+            .assertComplete()
+            .assertNoErrors()
+    }
+
+    @Test
+    fun testMultipleCancellations() {
+        val a = object {}
+        val b = object {}
+        val c = object {}
+
+        val effects = listOf(a, b, c)
+            .map {
+                Effect.just(it)
+                    .delay(100, MILLISECONDS)
+                    .cancellable(it)
+            }
+
+        Effect.merge(effects)
+            .test()
+            .also {
+                compositeDisposable.add(it)
+
+                Effects.cancel<Any>(a, c).subscribe().also { compositeDisposable.add(it) }
+            }
+            .await()
+            .assertValue(b)
+            .assertComplete()
+            .assertNoErrors()
+    }
 }
