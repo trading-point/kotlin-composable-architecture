@@ -1,16 +1,16 @@
-!WIP: USE IT AT YOUR OWN RISK!
-
 # A Kotlin port of The Composable Architecture (aka **TKA**)
+
+⚠️ THERE ARE STILL SEVERAL ROUGH EDGES SO USE IT AT YOUR OWN RISK ⚠️
 
 [Point-Free's](https://github.com/pointfreeco) [The Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture) is a Swift library so this "fork" has ported the core concepts in Kotlin in order to help share domain logic amongst Android/iOS apps.
 
 ## Design decisions
 - As with every Kotlin library that respect itself, the name needs to be paraphrased using the **K** and thus, **The Komposable Architecture** (aka **TKA**) was born.
-- The `tka` module is a pure Kotlin library module with no platform dependencies so that it can be 
-  used on any java/kotlin project.
+- Why RxJava? Because the nature of our project dictated the use of a reactive framework and at the time of adoption (2020) it was the only stable and production ready one for Android.
+- The `tka` module is a pure Kotlin library module with no platform dependencies so that it can be used on any java/kotlin project.
 - Effect is just a `typealias` of `Observable`, that way no type erasure is required. 
-- Since the state is immutable the `reduce` function returns a `Reduced` result that holds the new state along with it's Effect (`Reduced` is actually a `typealias` of `Pair<STATE, Effect<ACTION>`). 
-- Since there are no key paths (`\.`) in Kotlin, the concept of **Optics** was used to abstract read/write operations to immutable data structures.
+- Since the state is immutable and there is no `inout` in Kotlin, the `reduce` function returns a `Reduced` result that holds the new (copied) state along with it's `Effect`. 
+- Since there are no key/case paths (`\.`) in Kotlin, the concept of **Optics** was used to abstract read/write operations of immutable data structures.
   For more info on the concept please check [Arrow Optics](https://arrow-kt.io/docs/0.10/optics/lens/).
 - Because of the different lifecycle of objects in the JVM world and the absence of `deinit` to dispose
   the subscriptions, the `Store` contract was changed a bit to accept a parent stream and merge it to
@@ -18,11 +18,13 @@
   stream is exposed whose lifecycle need to be handled on call-site. 
 
 ## TODO
-- Migrate `forEach` reducers
 - Migrate Debugging tools
 - Migrate more Examples 😅
+- Migrate `forEach` reducers
 
 ## Future work
+- Add coroutines support
+- Add Arrow supplementary package to utilize the power of Arrow Optics and Arrow Meta
 - Add supplementary modules for bridging with Android Jetpack
 - Investigate Kotlin/Native porting
 
@@ -130,7 +132,7 @@ sealed class AppAction {
     object DecrementButtonTapped : AppAction()
     object IncrementButtonTapped : AppAction()
     object NumberFactButtonTapped : AppAction()
-    data class NumberFactResponse(val result: Result<String, ApiError>) : AppAction()
+    data class NumberFactResponse(val result: Result<String>) : AppAction()
 }
 
 sealed class Result<out SUCCESS, out ERROR> {
@@ -141,7 +143,7 @@ sealed class Result<out SUCCESS, out ERROR> {
 class ApiError : Error()
 ```
 
-Next we model the environment of dependencies this feature needs to do its job. In particular, to fetch a number fact we need to construct an `Effect` value that encapsulates the network request. So that dependency is a function from `Int` to `Effect<String, ApiError>`, where `String` represents the response from the request. Further, the effect will typically do its work on a background thread and so we need a way to receive the effect's values on the main thread. We do this via scheduler dependencies that are important to control so that we can write tests. We must use a `Scheduler` so that we can use, for example, `Schedulers.io` for background and `AndroidSchedulers.mainThread()` for main in production and a test scheduler in tests.
+Next we model the environment of dependencies this feature needs to do its job. In particular, to fetch a number fact we need to construct an `Effect` value that encapsulates the network request. So that dependency is a function from `Int` to `Effect<String>`, where `String` represents the response from the request. Further, the effect will typically do its work on a background thread and so we need a way to receive the effect's values on the main thread. We do this via scheduler dependencies that are important to control so that we can write tests. We must use a `Scheduler` so that we can use, for example, `Schedulers.io()` for background and `AndroidSchedulers.mainThread()` for main in production and a test scheduler in tests.
 
 ```kotlin
 interface AppEnvironment {
@@ -176,32 +178,37 @@ And then finally we define the view that displays the feature. It holds onto a `
 
 ```kotlin
 class AppView(
-    val store: Store<AppState, AppAction>
+  private val store: Store<AppState, AppAction>
 ) : Fragment(R.layout.app_view) {
 
-    val compositeDisposable = CompositeDisposable()
+  private var viewStoreDisposable: Disposable? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
-        val viewStore = store.view()
+    val viewStore = store.view()
 
-        viewStore.states
-            .subscribe { appState ->
-                textView.text = "${appState.count}"
+    viewStoreDisposable = viewStore.states
+      .subscribe { appState ->
+        textView.text = "${appState.count}"
 
-                appState.numberFactAlert?.also { Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show() }
-            }
+        appState.numberFactAlert
+          ?.also {
+            Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
 
-        decrButton.setOnClickListener { viewStore.send(AppAction.DecrementButtonTapped) }
-        incrButton.setOnClickListener { viewStore.send(AppAction.IncrementButtonTapped) }
-        factButton.setOnClickListener { viewStore.send(AppAction.NumberFactButtonTapped) }
-    }
+            viewStore.send(AppAction.FactAlertDismissed)
+          }
+      }
 
-    override fun onDestroyView() {
-        compositeDisposable.clear()
-        super.onDestroyView()
-    }
+    decrButton.setOnClickListener { viewStore.send(AppAction.DecrementButtonTapped) }
+    incrButton.setOnClickListener { viewStore.send(AppAction.IncrementButtonTapped) }
+    factButton.setOnClickListener { viewStore.send(AppAction.NumberFactButtonTapped) }
+  }
+
+  override fun onDestroyView() {
+    viewStoreDisposable?.dispose()
+    super.onDestroyView()
+  }
 }
 ```
 
@@ -250,28 +257,30 @@ Once the test store is created we can use it to make an assertion of an entire u
 The test below has the user increment and decrement the count, then they ask for a number fact, and the response of that effect triggers an alert to be shown, and then dismissing the alert causes the alert to go away.
 
 ```kotlin
-store.assert(
+store.assert {
     // Test that tapping on the increment/decrement buttons changes the count
-    send(IncrementButtonTapped) {
+    send(AppAction.IncrementButtonTapped) {
         it.copy(count = 1)
-    },
-    send(DecrementButtonTapped) {
+    }
+    send(AppAction.DecrementButtonTapped) {
         it.copy(count = 0)
-    },
+    }
 
     // Test that tapping the fact button causes us to receive a response from the effect. Note
     // that we have to advance the scheduler because we used `.receiveOn()` in the reducer.
-    send(NumberFactButtonTapped),
-    `do` { scheduler.triggerActions() },
-    receive(NumberFactResponse(Success("0 is a good number Brent"))) {
+    send(AppAction.NumberFactButtonTapped)
+    
+    scheduler.triggerActions()
+    
+    receive(AppAction.NumberFactResponse(Success("0 is a good number Brent"))) {
         it.copy(numberFactAlert = "0 is a good number Brent")
-    },
+    }
 
     // And finally dismiss the alert
-    send(FactAlertDismissed) {
+    send(AppAction.FactAlertDismissed) {
         it.copy(numberFactAlert = null)
     }
-)
+}
 ```
 
 That is the basics of building and testing a feature in the Composable Architecture. There are _a lot_ more things to be explored, such as composition, modularity, adaptability, and complex effects. The **original** [Examples](https://github.com/pointfreeco/swift-composable-architecture/tree/main/Examples) directory has a bunch of projects to explore to see more advanced usages.
@@ -302,20 +311,6 @@ No debugging tools have been ported yet... apart from a simple `reducer.debug()`
 
     This approach makes the fewest number of assumptions about how effects are created and transformed, and prevents unnecessary thread hops and re-dispatching. It also provides some testing benefits. If your effects are not responsible for their own scheduling, then in tests all of the effects would run synchronously and immediately. You would not be able to test how multiple in-flight effects interleave with each other and affect the state of your application. However, by leaving scheduling out of the `Store` we get to test these aspects of our effects if we so desire, or we can ignore if we prefer. We have that flexibility.
 
-    However, if you are still not a fan of our choice, then never fear! The Composable Architecture is flexible enough to allow you to introduce this functionality yourself if you so desire. It is possible to create a higher-order reducer that can force all effects to deliver their output on the main thread, regardless of where the effect does its work:
-
-    ```kotlin
-    fun <STATE, ACTION, ENVIRONMENT, S : Scheduler> Reducer<STATE, ACTION, ENVIRONMENT>.receiveOn(
-    scheduler: S
-    ): Reducer<STATE, ACTION, ENVIRONMENT> = Reducer { state, action, environment ->
-    reduce(state, action, environment)
-        .let { (newState, effect) ->
-            newState + effect.observeOn(scheduler)
-        }
-    }
-    ```
-  </details>
-
 ## Requirements
 
 This port of The Composable Architecture uses the RxJava 3 framework.
@@ -345,22 +340,6 @@ Special thanks to [Chris Liscio](https://twitter.com/liscio) who helped us work 
 ## Other libraries
 
 The Composable Architecture was built on a foundation of ideas started by other libraries, in particular [Elm](https://elm-lang.org) and [Redux](https://redux.js.org/).
-
-There are also many architecture libraries in the Swift and iOS community. Each one of these has their own set of priorities and trade-offs that differ from the Composable Architecture.
-
-* [RIBs](https://github.com/uber/RIBs)
-* [Loop](https://github.com/ReactiveCocoa/Loop)
-* [ReSwift](https://github.com/ReSwift/ReSwift)
-* [Workflow](https://github.com/square/workflow)
-* [ReactorKit](https://github.com/ReactorKit/ReactorKit)
-* [RxFeedback](https://github.com/NoTests/RxFeedback.swift)
-* [Mobius.swift](https://github.com/spotify/mobius.swift)
-* <details>
-  <summary>And more</summary>
-
-  * [Fluxor](https://github.com/FluxorOrg/Fluxor)
-  * [PromisedArchitectureKit](https://github.com/RPallas92/PromisedArchitectureKit)
-  </details>
 
 ## License
 

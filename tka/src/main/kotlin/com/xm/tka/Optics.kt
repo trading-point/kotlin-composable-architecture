@@ -1,6 +1,12 @@
 package com.xm.tka
 
 /**
+ * Type aliases to bridge original Swift concepts to Optics
+ */
+typealias StatePath<GLOBAL_STATE, LOCAL_STATE> = StateLens<GLOBAL_STATE, LOCAL_STATE>
+typealias CasePath<GLOBAL_ACTION, LOCAL_ACTION> = ActionPrism<GLOBAL_ACTION, LOCAL_ACTION>
+
+/**
  * A [StateLens] is an optic that can focus into a specific part of the state allowing to get/set/modify it
  *
  * @param GLOBAL_STATE the source state
