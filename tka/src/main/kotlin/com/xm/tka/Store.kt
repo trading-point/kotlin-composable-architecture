@@ -118,18 +118,25 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     fun <LOCAL_STATE : Any, LOCAL_ACTION : Any> scope(
         toLocalState: Getter<STATE, LOCAL_STATE>,
         fromLocalAction: Getter<LOCAL_ACTION, ACTION>
-    ): Store<LOCAL_STATE, LOCAL_ACTION> =
-        Store(
+    ): Store<LOCAL_STATE, LOCAL_ACTION> {
+        var reducedHolder: ReducedHolder<LOCAL_STATE, LOCAL_ACTION>? = null
+        return Store(
             initialState = toLocalState(currentState),
             reducer = { _, action ->
                 // force store to internally mutate it's value
                 fromLocalAction(action).let(::send)
                 // get a new local value
-                Reduced(toLocalState(currentState), none())
+                toLocalState(currentState).let { localState ->
+                    reducedHolder
+                        ?.apply { update(localState, none()) }
+                        ?: ReducedHolder<LOCAL_STATE, LOCAL_ACTION>(localState, none())
+                            .also { reducedHolder = it }
+                }
             },
             parentStream = _state.map { toLocalState(it) },
             printer = printer
         )
+    }
 
     /**
      * Scopes the store to one that exposes local state.
@@ -158,6 +165,8 @@ class Store<STATE : Any, ACTION : Any> private constructor(
             toLocalState(Observable.just(it)).runCatching { blockingFirst() }.getOrNull()
         }
 
+        var reducedHolder: ReducedHolder<LOCAL_STATE, LOCAL_ACTION>? = null
+
         return toLocalState(_state)
             .map { localState ->
                 Store(
@@ -166,10 +175,12 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                         // force store to internally mutate it's value
                         fromLocalAction(action).let(::send)
                         // get a new local value
-                        Reduced(
-                            extractLocalState(this@Store.currentState) ?: state,
-                            none()
-                        )
+                        (extractLocalState(currentState) ?: state).let { extractLocalState ->
+                            reducedHolder
+                                ?.apply { update(extractLocalState, none()) }
+                                ?: ReducedHolder<LOCAL_STATE, LOCAL_ACTION>(extractLocalState, none())
+                                    .also { reducedHolder = it }
+                        }
                     },
                     parentStream = _state.mapOptional { extractLocalState(it).toOptional() },
                     printer = printer
@@ -185,7 +196,7 @@ class Store<STATE : Any, ACTION : Any> private constructor(
      */
     fun <LOCAL_STATE : Any> scopes(
         toLocalState: Getter<Observable<STATE>, Observable<LOCAL_STATE>>
-    ): Observable<Store<LOCAL_STATE, ACTION>> = scopes(toLocalState, { it })
+    ): Observable<Store<LOCAL_STATE, ACTION>> = scopes(toLocalState) { it }
 
     /**
      * Scopes the store to one that exposes local optional state and actions.
