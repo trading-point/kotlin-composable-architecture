@@ -11,6 +11,7 @@ import com.xm.tka.StoreTest.Action2.Tap
 import com.xm.tka.StoreTest.Action3.Incr
 import com.xm.tka.StoreTest.Action3.Noop
 import com.xm.tka.ui.OptionalViewStore.Companion.optionalView
+import com.xm.tka.ui.ViewStore
 import com.xm.tka.ui.ViewStore.Companion.view
 import com.xm.tka.ui.ifLet
 import io.reactivex.rxjava3.schedulers.TestScheduler
@@ -146,7 +147,7 @@ class StoreTest {
                 it
             }
 
-        assertEquals(2, numCalls1)
+        assertEquals(1, numCalls1)
     }
 
     @Test
@@ -159,41 +160,52 @@ class StoreTest {
         var numCalls2 = 0
         var numCalls3 = 0
 
-        val store = Store(0, counterReducer, Unit)
-            .scope {
-                numCalls1++
-                it
-            }
-            .scope {
-                numCalls2++
-                it
-            }
-            .scope {
-                numCalls3++
-                it
-            }
+        val store1 = Store(0, counterReducer, Unit)
+        val store2 = store1.scope {
+            numCalls1++
+            it
+        }
+        val store3 = store2.scope {
+            numCalls2++
+            it
+        }
+        val store4 = store3.scope {
+            numCalls3++
+            it
+        }
+
+        val viewStore1 = ViewStore(store1)
+        val viewStore2 = ViewStore(store2)
+        val viewStore3 = ViewStore(store3)
+        val viewStore4 = ViewStore(store4)
+
+        assertEquals(1, numCalls1)
+        assertEquals(1, numCalls2)
+        assertEquals(1, numCalls3)
+
+        viewStore4.send(Unit)
 
         assertEquals(2, numCalls1)
         assertEquals(2, numCalls2)
         assertEquals(2, numCalls3)
 
-        store.send(Unit)
+        viewStore4.send(Unit)
+
+        assertEquals(3, numCalls1)
+        assertEquals(3, numCalls2)
+        assertEquals(3, numCalls3)
+
+        viewStore4.send(Unit)
 
         assertEquals(4, numCalls1)
+        assertEquals(4, numCalls2)
+        assertEquals(4, numCalls3)
+
+        viewStore4.send(Unit)
+
+        assertEquals(5, numCalls1)
         assertEquals(5, numCalls2)
-        assertEquals(6, numCalls3)
-
-        store.send(Unit)
-
-        assertEquals(6, numCalls1)
-        assertEquals(8, numCalls2)
-        assertEquals(10, numCalls3)
-
-        store.send(Unit)
-
-        assertEquals(8, numCalls1)
-        assertEquals(11, numCalls2)
-        assertEquals(14, numCalls3)
+        assertEquals(5, numCalls3)
     }
 
     sealed class Action2 {

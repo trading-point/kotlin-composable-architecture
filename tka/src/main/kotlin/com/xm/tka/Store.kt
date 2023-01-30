@@ -45,8 +45,8 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     private val bufferedActions: LinkedBlockingDeque<ACTION> = LinkedBlockingDeque()
     private var isSending: Boolean = false
 
-    internal val effectDisposables: MutableMap<Long, Disposable> = mutableMapOf()
-    private var id: Long = 0
+    internal val effectDisposables: MutableMap<ULong, Disposable> = mutableMapOf()
+    private var id: ULong = ULong.MIN_VALUE
 
     fun send(action: ACTION) {
         if (!isSending) {
@@ -120,9 +120,11 @@ class Store<STATE : Any, ACTION : Any> private constructor(
         fromLocalAction: Getter<LOCAL_ACTION, ACTION>
     ): Store<LOCAL_STATE, LOCAL_ACTION> {
         var reducedHolder: ReducedHolder<LOCAL_STATE, LOCAL_ACTION>? = null
+        var isSending = false
         return Store(
             initialState = toLocalState(currentState),
             reducer = { _, action ->
+                isSending = true
                 // force store to internally mutate it's value
                 fromLocalAction(action).let(::send)
                 // get a new local value
@@ -131,9 +133,9 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                         ?.apply { update(localState, none()) }
                         ?: ReducedHolder<LOCAL_STATE, LOCAL_ACTION>(localState, none())
                             .also { reducedHolder = it }
-                }
+                }.also { isSending = false }
             },
-            parentStream = _state.map { toLocalState(it) },
+            parentStream = _state.skip(1).skipWhile { isSending }.map { toLocalState(it) },
             printer = printer
         )
     }
