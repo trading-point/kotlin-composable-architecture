@@ -104,7 +104,7 @@ interface Reducer<STATE, ACTION : Any, ENVIRONMENT> {
             reduce: Reduce<STATE, ACTION, ENVIRONMENT>
         ): Reducer<STATE, ACTION, ENVIRONMENT> = object : Reducer<STATE, ACTION, ENVIRONMENT> {
 
-            private val context: ReduceContext<STATE, ACTION, ENVIRONMENT> = ReduceContext()
+            private val context: ReduceContext<STATE, ACTION> = ReduceContext()
 
             override fun reduce(
                 state: STATE,
@@ -177,7 +177,7 @@ interface Reducer<STATE, ACTION : Any, ENVIRONMENT> {
 /**
  * Helper context to attach extensions to generic types to be used with the reduce function
  */
-interface ReduceContext<STATE, ACTION : Any, ENVIRONMENT> {
+interface ReduceContext<STATE, ACTION : Any> {
 
     /**
      * Combines a state and an effect into a [Reduced] result
@@ -200,8 +200,8 @@ interface ReduceContext<STATE, ACTION : Any, ENVIRONMENT> {
         /**
          * [ReduceContext] constructor
          */
-        operator fun <STATE, ACTION : Any, ENVIRONMENT> invoke(): ReduceContext<STATE, ACTION, ENVIRONMENT> =
-            object : ReduceContext<STATE, ACTION, ENVIRONMENT> {
+        operator fun <STATE, ACTION : Any> invoke(): ReduceContext<STATE, ACTION> =
+            object : ReduceContext<STATE, ACTION> {
                 private var reducedHolder: ReducedHolder<STATE, ACTION>? = null
 
                 override fun reduced(state: STATE, effect: Effect<ACTION>): Reduced<STATE, ACTION> =
@@ -216,8 +216,7 @@ interface ReduceContext<STATE, ACTION : Any, ENVIRONMENT> {
 /**
  * A function that accepts a State and an Action and produces a new state
  */
-typealias Reduce<STATE, ACTION, ENVIRONMENT> =
-    ReduceContext<STATE, ACTION, ENVIRONMENT>.(STATE, ACTION, ENVIRONMENT) -> Reduced<STATE, ACTION>
+typealias Reduce<STATE, ACTION, ENVIRONMENT> = ReduceContext<STATE, ACTION>.(STATE, ACTION, ENVIRONMENT) -> Reduced<STATE, ACTION>
 
 /**
  * The Result of the state reduction along with its side-effects
