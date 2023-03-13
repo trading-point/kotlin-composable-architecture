@@ -41,7 +41,6 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     internal val currentState: STATE
         get() = requireNotNull(_state.value)
 
-    private val synchronousActionsToSend: LinkedBlockingDeque<ACTION> = LinkedBlockingDeque()
     private val bufferedActions: LinkedBlockingDeque<ACTION> = LinkedBlockingDeque()
     private var isSending: Boolean = false
 
@@ -49,34 +48,23 @@ class Store<STATE : Any, ACTION : Any> private constructor(
     private var id: ULong = ULong.MIN_VALUE
 
     fun send(action: ACTION) {
-        if (!isSending) {
-            synchronousActionsToSend.add(action)
-        } else {
-            bufferedActions.add(action)
-            return
-        }
+        bufferedActions.add(action)
+        if (isSending) return
 
-        while (synchronousActionsToSend.any() || bufferedActions.any()) {
-            with(synchronousActionsToSend.poll() ?: bufferedActions.poll() ?: continue) {
-                isSending = true
-                val (newState, effect) = try {
-                    reducer(currentState, this)
-                } finally {
-                    isSending = false
-                }
-                _state.onNext(newState)
+        isSending = true
+        var currentState = this.currentState
+
+        while (bufferedActions.any()) {
+            with(bufferedActions.poll() ?: continue) {
+                val (newState, effect) = reducer(currentState, this)
+                currentState = newState
 
                 var didComplete = false
                 val id = id.inc()
 
-                var isProcessingEffects = true
                 val effectDisposable = effect.subscribe(
                     {
-                        if (isProcessingEffects) {
-                            synchronousActionsToSend.add(it)
-                        } else {
-                            send(it)
-                        }
+                        send(it)
                     },
                     {
                         printer.print("TKA: Store: effectDisposable", it)
@@ -88,7 +76,6 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                         effectDisposables.remove(id)
                     }
                 )
-                isProcessingEffects = false
 
                 if (didComplete.not()) {
                     effectDisposables[id] = effectDisposable
@@ -97,6 +84,9 @@ class Store<STATE : Any, ACTION : Any> private constructor(
                 }
             }
         }
+
+        _state.onNext(currentState)
+        isSending = false
     }
 
     fun dispose() {
