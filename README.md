@@ -354,7 +354,7 @@ dependencies {
 
 ### Requirements
 
-This port of The Composable Architecture uses the RxJava 3 framework.
+This port of The Composable Architecture uses the [RxJava 3](https://github.com/ReactiveX/RxJava) framework.
 
 <!-- ## Installation
 
