@@ -1,6 +1,6 @@
 # A Kotlin port of The Composable Architecture (aka **TKA**)
 
-⚠️ THERE ARE STILL SEVERAL ROUGH EDGES SO USE IT AT YOUR OWN RISK ⚠️
+⚠️ ALTHOUGH IT'S BEING USED IN PRODUCTION, THERE ARE STILL SEVERAL ROUGH EDGES SO USE IT AT YOUR OWN RISK ⚠️
 
 [Point-Free's](https://github.com/pointfreeco) [The Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture) is a Swift library so this "fork" has ported the core concepts in Kotlin in order to help share domain logic amongst Android/iOS apps.
 
@@ -49,7 +49,6 @@ The Composable Architecture is a library for building applications in a consiste
   - [FAQ](#faq)
   - [Requirements](#requirements)
   - [Help](#help)
-  - [Credits and thanks](#credits-and-thanks)
   - [Other libraries](#other-libraries)
   - [License](#license)
 
@@ -298,6 +297,7 @@ No debugging tools have been ported yet... apart from a simple `reducer.debug()`
 * How does the Composable Architecture compare to Elm, Redux, and others?
   <details>
     <summary>Expand to see answer</summary>
+    
     The Composable Architecture (TCA) is built on a foundation of ideas popularized by Elm and Redux, but made to feel at home in the Swift language and on Apple's platforms.
 
     In some ways TCA is a little more opinionated than the other libraries. For example, Redux is not prescriptive with how one executes side effects, but TCA requires all side effects to be modeled in the `Effect` type and returned from the reducer.
@@ -306,6 +306,7 @@ No debugging tools have been ported yet... apart from a simple `reducer.debug()`
 
     And then there are certain things that TCA prioritizes highly that are not points of focus for Redux, Elm, or most other libraries. For example, composition is very important aspect of TCA, which is the process of breaking down large features into smaller units that can be glued together. This is accomplished with the `pullback` and `combine` operators on reducers, and it aids in handling complex features as well as modularization for a better-isolated code base and improved compile times.
   </details>
+  </br>
 
 * Why isn't `Store` thread-safe? <br> Why isn't `send` queued? <br> Why isn't `send` run on the main thread?
   <details>
@@ -314,6 +315,18 @@ No debugging tools have been ported yet... apart from a simple `reducer.debug()`
     When an action is sent to the `Store`, a reducer is run on the current state, and this process cannot be done from multiple threads. If you are using an effect that may deliver its output on a non-main thread, you must explicitly perform `.observeOn()` in order to force it back on the main thread.
 
     This approach makes the fewest number of assumptions about how effects are created and transformed, and prevents unnecessary thread hops and re-dispatching. It also provides some testing benefits. If your effects are not responsible for their own scheduling, then in tests all of the effects would run synchronously and immediately. You would not be able to test how multiple in-flight effects interleave with each other and affect the state of your application. However, by leaving scheduling out of the `Store` we get to test these aspects of our effects if we so desire, or we can ignore if we prefer. We have that flexibility.
+  </details>
+  </br>
+
+* How to run the tests?
+  <details>
+    <summary>Expand to see answer</summary>
+
+    Via the command line:</br>
+    &emsp;Run `./gradlew test`</br>
+    Via Android Studio:</br>
+    &emsp;Right-click on the `tka` module and select `Run "Tests in 'kotlin-composable-architecture.tka'"`
+  </details>
 
 ## Requirements
 
@@ -331,15 +344,7 @@ You can add ComposableArchitecture to an Xcode project by adding it as a package
 
 ## Help
 
-If you want to discuss the Composable Architecture or have a question about how to use it to solve a particular problem, ask around on [its Swift forum](https://forums.swift.org/c/related-projects/swift-composable-architecture).
-
-## Credits and thanks
-
-The following people gave feedback on the library at its early stages and helped make the library what it is today:
-
-Paul Colton, Kaan Dedeoglu, Matt Diephouse, Josef Doležal, Eimantas, Matthew Johnson, George Kaimakas, Nikita Leonov, Christopher Liscio, Jeffrey Macko, Alejandro Martinez, Shai Mishali, Willis Plummer, Simon-Pierre Roy, Justin Price, Sven A. Schmidt, Kyle Sherman, Petr Šíma, Jasdev Singh, Maxim Smirnov, Ryan Stone, Daniel Hollis Tavares, and all of the [Point-Free](https://www.pointfree.co) subscribers 😁.
-
-Special thanks to [Chris Liscio](https://twitter.com/liscio) who helped us work through many strange SwiftUI quirks and helped refine the final API.
+If you want to discuss the Composable Architecture or have a question about how to use it to solve a particular problem, ask around on [its Swift forum](https://forums.swift.org/c/related-projects/swift-composable-architecture) **or contact us**.
 
 ## Other libraries
 
