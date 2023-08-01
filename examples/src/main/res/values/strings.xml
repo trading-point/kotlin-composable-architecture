@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Case Studies</string>
+
+    <string name="main_fragment_toolbar_title">Case Studies</string>
+    <string name="getting_started_counter_toolbar_title">01-GettingStarted-Counter</string>
+    <string name="getting_started_two_counters_toolbar_title">01-GettingStarted-Composition-TwoCounters</string>
+    <string name="getting_started_two_counters_compose_toolbar_title">01-GettingStarted-Composition-TwoCounters-Compose</string>
+    <string name="effects_basics_toolbar_title">02-Effects-Basics</string>
+    <string name="effects_cancellation_toolbar_title">02-Effects-Cancellation</string>
+</resources>

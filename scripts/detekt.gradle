@@ -6,7 +6,6 @@ https://github.com/detekt/detekt
 apply plugin: "io.gitlab.arturbosch.detekt"
 
 detekt {
-    failFast = true // fail build on any finding
     buildUponDefaultConfig = true
 
     reports {
@@ -17,5 +16,5 @@ detekt {
 tasks.detekt.jvmTarget = "1.8"
 
 dependencies {
-    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.10.0"
+    detektPlugins libraries.detekt.formatting
 }
