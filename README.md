@@ -4,6 +4,24 @@
 
 [Point-Free's](https://github.com/pointfreeco) [The Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture) is a Swift library so this "fork" has ported the core concepts in Kotlin in order to help share domain logic amongst Android/iOS apps.
 
+- [A Kotlin port of The Composable Architecture (aka **TKA**)](#a-kotlin-port-of-the-composable-architecture-aka-tka)
+  - [Design decisions](#design-decisions)
+  - [TODO](#todo)
+  - [Future work](#future-work)
+- [The Composable Architecture](#the-composable-architecture)
+  - [What is the Composable Architecture?](#what-is-the-composable-architecture)
+  - [Learn More](#learn-more)
+  - [Examples](#examples)
+  - [Basic Usage](#basic-usage)
+    - [Testing](#testing)
+    - [Debugging](#debugging)
+  - [FAQ](#faq)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+  - [Help](#help)
+  - [Other libraries](#other-libraries)
+  - [License](#license)
+
 ## Design decisions
 
 - As with every Kotlin library that respect itself, the name needs to be paraphrased using the **K** and thus, **The Komposable Architecture** (aka **TKA**) was born.
@@ -34,23 +52,6 @@
 # The Composable Architecture
 
 The Composable Architecture is a library for building applications in a consistent and understandable way, with composition, testing, and ergonomics in mind. It can be used in SwiftUI, UIKit, and more, and on any Apple platform (iOS, macOS, tvOS, and watchOS) **and now on any JVM platform as well**
-
-- [A Kotlin port of The Composable Architecture (aka **TKA**)](#a-kotlin-port-of-the-composable-architecture-aka-tka)
-  - [Design decisions](#design-decisions)
-  - [TODO](#todo)
-  - [Future work](#future-work)
-- [The Composable Architecture](#the-composable-architecture)
-  - [What is the Composable Architecture?](#what-is-the-composable-architecture)
-  - [Learn More](#learn-more)
-  - [Examples](#examples)
-  - [Basic Usage](#basic-usage)
-    - [Testing](#testing)
-    - [Debugging](#debugging)
-  - [FAQ](#faq)
-  - [Requirements](#requirements)
-  - [Help](#help)
-  - [Other libraries](#other-libraries)
-  - [License](#license)
 
 ## What is the Composable Architecture?
 
@@ -328,7 +329,30 @@ No debugging tools have been ported yet... apart from a simple `reducer.debug()`
     &emsp;Right-click on the `tka` module and select `Run "Tests in 'kotlin-composable-architecture.tka'"`
   </details>
 
-## Requirements
+## Installation
+
+The library is available on Jitpack.
+
+First, you need to add Jitpack in your root `build.gradle` at the end of repositories:
+
+```
+allprojects {
+  repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+  }
+}
+```
+
+Then, add the project dependency:
+
+```
+dependencies {
+  implementation 'com.xm:kotlin-composable-architecture:0.0.18'
+}
+```
+
+### Requirements
 
 This port of The Composable Architecture uses the RxJava 3 framework.
 
