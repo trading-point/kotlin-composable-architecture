@@ -348,7 +348,7 @@ Then, add the project dependency:
 
 ```
 dependencies {
-  implementation 'com.xm:kotlin-composable-architecture:0.0.18'
+  implementation 'com.xm:kotlin-composable-architecture:0.1.0'
 }
 ```
 
