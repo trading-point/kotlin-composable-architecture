@@ -84,7 +84,7 @@ You can watch all of the episodes [here](https://www.pointfree.co/collections/co
 
 ## Examples
 
-No examples have been ported yet but you can always take a look at the [original ones](https://github.com/pointfreeco/swift-composable-architecture#examples)!
+The corresponding examples folder now has ported a few basic [examples](https://github.com/trading-point/kotlin-composable-architecture/tree/main/examples) but you can always take a look at the [original ones](https://github.com/pointfreeco/swift-composable-architecture#examples)!
 
 <!-- [![Screen shots of example applications](https://d3rccdn33rt8ze.cloudfront.net/composable-architecture/demos.png)](./Examples)
 
@@ -103,6 +103,10 @@ This repo comes with _lots_ of examples to demonstrate how to solve common and c
 * [Tic-Tac-Toe](./Examples/TicTacToe)
 * [Todos](./Examples/Todos)
 * [Voice memos](./Examples/VoiceMemos) -->
+
+## Videos/Presentations
+
+The usage of TKA in production is also covered in this talk on [YouTube](https://www.youtube.com/live/9YwVaUNKqfU?si=sO-zzk7_36T1g2A2).
 
 ## Basic Usage
 
