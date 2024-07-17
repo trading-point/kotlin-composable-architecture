@@ -5,12 +5,14 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    namespace = "com.xm.examples"
+
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.xm.examples"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
