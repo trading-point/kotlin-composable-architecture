@@ -8,9 +8,9 @@ ext {
     //region Libraries
     libraries = [:]
 
-    // https://github.com/JetBrains/kotlin/blob/master/ChangeLog.md#1720
+    // https://github.com/JetBrains/kotlin/releases/tag/v2.0.0
     libraries.kotlin = [:]
-    libraries.kotlin.version = '1.7.20'
+    libraries.kotlin.version = '2.0.0'
     libraries.kotlin.jdk = "org.jetbrains.kotlin:kotlin-stdlib:${libraries.kotlin.version}"
 
     libraries.rx = [:]
