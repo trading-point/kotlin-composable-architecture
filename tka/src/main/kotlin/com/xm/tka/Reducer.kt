@@ -216,6 +216,7 @@ interface ReduceContext<STATE, ACTION : Any> {
 /**
  * A function that accepts a State and an Action and produces a new state
  */
+@Suppress("ParameterListWrapping", "MaxLineLength")
 typealias Reduce<STATE, ACTION, ENVIRONMENT> = ReduceContext<STATE, ACTION>.(STATE, ACTION, ENVIRONMENT) -> Reduced<STATE, ACTION>
 
 /**

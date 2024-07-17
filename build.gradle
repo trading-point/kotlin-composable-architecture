@@ -1,5 +1,3 @@
-apply from: 'scripts/dependency-updates.gradle'
-
 buildscript {
     apply from: 'scripts/dependencies.gradle'
 
@@ -11,6 +9,12 @@ buildscript {
         classpath classpaths.detekt
     }
 }
+
+plugins {
+    id 'org.jetbrains.kotlin.plugin.compose' version "2.0.0"
+}
+
+apply from: 'scripts/dependency-updates.gradle'
 
 allprojects {
     repositories(repos)

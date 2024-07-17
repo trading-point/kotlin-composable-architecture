@@ -7,6 +7,7 @@ apply plugin: "io.gitlab.arturbosch.detekt"
 
 detekt {
     buildUponDefaultConfig = true
+    config = files("$projectDir/detekt/config.yml")
 
     reports {
         html.enabled = true

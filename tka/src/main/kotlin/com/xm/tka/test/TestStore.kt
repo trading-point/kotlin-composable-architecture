@@ -36,6 +36,7 @@ import java.util.LinkedList
  *
  *   Source: https://github.com/pointfreeco/swift-composable-architecture/blob/main/Sources/ComposableArchitecture/TestSupport/TestStore.swift
  */
+@Suppress("MaxLineLength")
 class TestStore<STATE : Any, LOCAL_STATE : Any, ACTION : Any, LOCAL_ACTION : Any, ENVIRONMENT : Any> private constructor(
     initialState: STATE,
     private val reducer: Reducer<STATE, ACTION, ENVIRONMENT>,
@@ -284,6 +285,7 @@ Unhandled actions: $receivedActions
             fun <STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> `do`(
                 work: () -> Unit
             ): Step<STATE, LOCAL_STATE, ACTION, LOCAL_ACTION, ENVIRONMENT> =
+                @Suppress("Wrapping")
                 Step(Type.Environment { work(); it })
         }
     }
