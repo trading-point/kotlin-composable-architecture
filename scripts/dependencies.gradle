@@ -29,8 +29,8 @@ ext {
 
     //region Classpaths
     classpaths = [:]
-    // https://developer.android.com/studio/releases/gradle-plugin#7-1-2
-    classpaths.gradle = "com.android.tools.build:gradle:7.1.2"
+    // https://developer.android.com/studio/releases/gradle-plugin#8.4.0
+    classpaths.gradle = "com.android.tools.build:gradle:8.4.0"
     classpaths.kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${libraries.kotlin.version}"
     // https://github.com/ben-manes/gradle-versions-plugin/releases/tag/v0.44.0
     classpaths.versions = "com.github.ben-manes:gradle-versions-plugin:0.44.0"
