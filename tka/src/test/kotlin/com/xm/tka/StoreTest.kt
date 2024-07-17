@@ -174,9 +174,9 @@ class StoreTest {
             it
         }
 
-        val viewStore1 = ViewStore(store1)
-        val viewStore2 = ViewStore(store2)
-        val viewStore3 = ViewStore(store3)
+//        val viewStore1 = ViewStore(store1)
+//        val viewStore2 = ViewStore(store2)
+//        val viewStore3 = ViewStore(store3)
         val viewStore4 = ViewStore(store4)
 
         assertEquals(1, numCalls1)
