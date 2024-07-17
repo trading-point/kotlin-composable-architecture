@@ -2,7 +2,7 @@ ext {
     //region Versions
     versions = [:]
     versions.sdk = [:]
-    versions.sdk.compatibility = "1.8"
+    versions.sdk.compatibility = JavaVersion.VERSION_17
     //endregion
 
     //region Libraries
