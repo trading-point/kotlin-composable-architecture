@@ -12,6 +12,7 @@
   - [What is the Composable Architecture?](#what-is-the-composable-architecture)
   - [Learn More](#learn-more)
   - [Examples](#examples)
+  - [Videos/Presentations](#videospresentations)
   - [Basic Usage](#basic-usage)
     - [Testing](#testing)
     - [Debugging](#debugging)
@@ -352,7 +353,7 @@ Then, add the project dependency:
 
 ```
 dependencies {
-  implementation 'com.xm:kotlin-composable-architecture:0.1.1'
+  implementation 'com.xm:kotlin-composable-architecture:0.1.2'
 }
 ```
 
