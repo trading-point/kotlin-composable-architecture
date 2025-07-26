@@ -68,7 +68,7 @@ class GettingStartedCompositionTwoCountersCompose : Fragment() {
 fun TwoCountersScreen(viewModel: TwoCountersViewModel) {
 
     Column(Modifier.padding(horizontal = 22.dp)) {
-        Text(readMe.uppercase(), fontSize = 14.sp, color = colorResource(R.color.grey))
+        Text(readMe.uppercase(), fontSize = 14.sp, color = colorResource(R.color.textColorPrimary))
 
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -99,7 +99,7 @@ fun CounterScreenView(viewStore: ViewStore<CounterState, CounterAction>) {
                 Text("-", fontSize = 22.sp)
             }
 
-            Text(counter.toString(), fontSize = 22.sp)
+            Text(counter.toString(), fontSize = 22.sp, color = colorResource(R.color.textColorPrimary))
 
             TextButton(onClick = { viewStore.send(CounterAction.IncrementButtonTapped) }) {
                 Text("+", fontSize = 22.sp)

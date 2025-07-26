@@ -10,6 +10,7 @@
         <item name="actionBarStyle">@style/Material3ActionBar</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
         <!-- Customize your theme here. -->
+        <item name="colorReadmeText">@color/textColorPrimary</item>
     </style>
 
     <style name="Material3ActionBar" parent="Widget.Material3.ActionBar.Solid">

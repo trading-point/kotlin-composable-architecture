@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="grey">#6C6666</color>
+    <!-- Softer, lighter tones for dark background -->
+    <color name="purple_200">#FFCE93F9</color>  <!-- Light purple for highlights -->
+    <color name="purple_500">#FF9C27B0</color>  <!-- Lighter version for primary -->
+    <color name="purple_700">#FF985EFF</color>  <!-- Accent version for dark -->
+
+    <color name="teal_200">#FF03DAC5</color>    <!-- Usually safe to keep same -->
+    <color name="teal_700">#FF66FFF9</color>    <!-- Bright teal for dark bg -->
+
+    <!-- Inverted tones for readability -->
+    <color name="black">#FF121212</color>       <!-- Use white in dark theme -->
+    <color name="white">#FFFFFFFF</color>       <!-- Use dark gray as "white" -->
+
+    <!-- Dimmed gray for dark theme elements -->
+    <color name="grey">#FFB0B0B0</color>        <!-- Softer contrast gray -->
+    <color name="textColorPrimary">@color/black</color>
 </resources>

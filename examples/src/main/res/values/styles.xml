@@ -4,7 +4,7 @@
     <style name="ReadmeText" parent="TextAppearance.Material3.BodyLarge">
         <item name="android:textAllCaps">true</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">?attr/colorReadmeText</item>
     </style>
 
     <style name="buttonStyle" parent="Widget.Material3.Button.TextButton">
