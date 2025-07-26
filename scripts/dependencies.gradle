@@ -2,7 +2,9 @@ ext {
     //region Versions
     versions = [:]
     versions.sdk = [:]
+    versions.kotlin = [:]
     versions.sdk.compatibility = JavaVersion.VERSION_17
+    versions.kotlin.jvm = 17
     //endregion
 
     //region Libraries

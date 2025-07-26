@@ -14,5 +14,9 @@ dependencies {
     testImplementation libraries.junit
 }
 
+kotlin {
+    jvmToolchain(versions.kotlin.jvm)
+}
+
 sourceCompatibility = versions.sdk.compatibility
 targetCompatibility = versions.sdk.compatibility
