@@ -35,7 +35,7 @@ android {
         targetCompatibility versions.sdk.compatibility
     }
     kotlinOptions {
-        jvmTarget = versions.kotlin.jvm
+        jvmTarget = versions.kotlin.jvm.toString()
     }
 }
 
