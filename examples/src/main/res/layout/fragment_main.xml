@@ -9,35 +9,35 @@
 
     <Button
         android:id="@+id/btn_basics"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Basics" />
 
     <Button
         android:id="@+id/btn_pullback"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Pullback and Combine" />
 
     <Button
         android:id="@+id/btn_pullback_compose"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Pullback and Combine (Jetpack Compose)" />
 
     <Button
         android:id="@+id/btn_effects"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Effects" />
 
     <Button
         android:id="@+id/btn_cancellation"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Cancellation" />
