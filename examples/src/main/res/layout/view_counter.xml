@@ -15,7 +15,7 @@
 
     <Button
         android:id="@+id/decrement"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="-"
@@ -32,7 +32,7 @@
 
     <Button
         android:id="@+id/increment"
-        style="@style/Widget.AppCompat.Button.Borderless"
+        style="@style/buttonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="+"

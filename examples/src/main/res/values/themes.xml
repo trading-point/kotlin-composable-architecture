@@ -1,10 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Kotlincomposablearchitecture" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.Kotlincomposablearchitecture" parent="Theme.Material3.DayNight">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryDark">@color/purple_700</item>
         <item name="colorAccent">@color/teal_200</item>
+
+        <!-- ActionBar styling for Material3 -->
+        <item name="actionBarStyle">@style/Material3ActionBar</item>
+        <item name="actionBarTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
         <!-- Customize your theme here. -->
+        <item name="colorReadmeText">@color/textColorPrimary</item>
+    </style>
+
+    <style name="Material3ActionBar" parent="Widget.Material3.ActionBar.Solid">
+        <item name="background">?attr/colorPrimary</item>
+        <item name="titleTextStyle">@style/Material3ActionBarTitle</item>
+    </style>
+
+    <style name="Material3ActionBarTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
 </resources>
