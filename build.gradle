@@ -19,3 +19,9 @@ apply from: 'scripts/dependency-updates.gradle'
 allprojects {
     repositories(repos)
 }
+
+tasks.register("testAll") {
+    description = 'Runs all unit tests across all modules'
+    group = 'verification'
+    dependsOn ':examples:testDebugUnitTest', ':tka:test'
+}
